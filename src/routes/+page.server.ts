@@ -5,7 +5,13 @@ export const load: PageServerLoad = async ({ fetch }) => {
   try {
     const result = await runGraphQL<{ __typename: string }>(
       fetch,
-      `query HealthCheck { __typename }`,
+      `
+        query {
+            search(term: "Hattorius") {
+                __typename
+            }
+        }
+      `,
     );
 
     if (result.errors?.length) {
