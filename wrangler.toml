@@ -1,0 +1,6 @@
+name = "warerastats-ui"
+compatibility_date = "2026-06-08"
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+[vars]
+GRAPHQL_ENDPOINT = "https://graph.warerastats.io/query"
