@@ -12,6 +12,8 @@
     "houdini:pull-schema": "houdini pull-schema",
     "cf:dev": "pnpm build ; wrangler pages dev .svelte-kit/cloudflare",
     "cf:deploy": "pnpm build ; wrangler pages deploy .svelte-kit/cloudflare",
+    "cf:deploy:pages": "wrangler pages deploy .svelte-kit/cloudflare --project-name warerastats-ui",
+    "cf:deploy:worker": "pnpm build ; wrangler deploy",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
