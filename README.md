@@ -26,13 +26,13 @@ This keeps bearer auth out of browser code.
 ## Local development
 
 1. Install deps:
-   - `pnpm install`
+    - `pnpm install`
 2. Pull the latest schema (requires `GRAPHQL_BEARER_TOKEN`):
-   - `pnpm houdini:pull-schema`
+    - `pnpm houdini:pull-schema`
 3. Optional runtime generation:
-   - `pnpm houdini:generate`
+    - `pnpm houdini:generate`
 4. Start dev server:
-   - `pnpm dev`
+    - `pnpm dev`
 
 ## Build
 

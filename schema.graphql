@@ -2,15 +2,15 @@
 Directs the executor to defer this fragment when the `if` argument is true or undefined.
 """
 directive @defer(
-  """
-  Deferred when true or undefined.
-  """
-  if: Boolean = true
+    """
+    Deferred when true or undefined.
+    """
+    if: Boolean = true
 
-  """
-  Unique name
-  """
-  label: String
+    """
+    Unique name
+    """
+    label: String
 ) on FRAGMENT_SPREAD | INLINE_FRAGMENT
 
 """
@@ -19,993 +19,1004 @@ Indicates exactly one field must be supplied and this field must not be `null`.
 directive @oneOf on INPUT_OBJECT
 
 union Activity =
-  | CaseTransaction
-  | CraftTransaction
-  | DismantleTransaction
-  | LootTransaction
-  | MarketTransaction
-  | TradeTransaction
-  | WageTransaction
+    | CaseTransaction
+    | CraftTransaction
+    | DismantleTransaction
+    | LootTransaction
+    | MarketTransaction
+    | TradeTransaction
+    | WageTransaction
 
 type ActivityConnection {
-  edges: [Activity!]!
-  endCursor: ID
-  hasNextPage: Boolean!
+    edges: [Activity!]!
+    endCursor: ID
+    hasNextPage: Boolean!
 }
 
 type Battle {
-  attackerCountry: Country
-  attackerDamages: Int!
-  attackerRegion: Region
-  damageReports(
-    entityIds: [ID!]
-    entityKind: EntityKind
-    from: DateTime
-    to: DateTime
-  ): [BattleDamageReport!]!
-  damages(after: ID, first: Int = 50, side: Side, userId: ID): [Damage!]!
-  defenderCountry: Country
-  defenderDamages: Int!
-  defenderRegion: Region
-  endedAt: DateTime
-  id: ID!
-  isActive: Boolean!
-  lastUpdated: DateTime!
-  mus: [Mu!]!
-  orderChanges(after: ID, first: Int = 20): [BattleOrderChange!]!
-  topDamage(limit: Int = 10): [DamageRanking!]!
-  winnerSide: Side
+    attackerCountry: Country
+    attackerDamages: Int!
+    attackerRegion: Region
+    damageReports(
+        entityIds: [ID!]
+        entityKind: EntityKind
+        from: DateTime
+        to: DateTime
+    ): [BattleDamageReport!]!
+    damages(after: ID, first: Int = 50, side: Side, userId: ID): [Damage!]!
+    defenderCountry: Country
+    defenderDamages: Int!
+    defenderRegion: Region
+    endedAt: DateTime
+    id: ID!
+    isActive: Boolean!
+    lastUpdated: DateTime!
+    mus: [Mu!]!
+    orderChanges(after: ID, first: Int = 20): [BattleOrderChange!]!
+    topDamage(limit: Int = 10): [DamageRanking!]!
+    winnerSide: Side
 }
 
 type BattleDamageReport {
-  battle: Battle!
-  damage: Int64!
-  damagePct: Float!
-  entity: Entity
-  equipment: [EquipmentUsage!]!
-  id: ID!
-  intervalStart: DateTime!
-  side: String!
+    battle: Battle!
+    damage: Int64!
+    damagePct: Float!
+    entity: Entity
+    equipment: [EquipmentUsage!]!
+    id: ID!
+    intervalStart: DateTime!
+    side: String!
 }
 
 enum BattleFilter {
-  ACTIVE
-  ALL
-  FINALIZED
+    ACTIVE
+    ALL
+    FINALIZED
 }
 
 type BattleOrderChange {
-  action: String!
-  at: DateTime!
-  battle: Battle!
-  entity: Entity
-  id: ID!
-  kind: String!
-  side: String!
+    action: String!
+    at: DateTime!
+    battle: Battle!
+    entity: Entity
+    id: ID!
+    kind: String!
+    side: String!
 }
 
 type CaseItemStat {
-  avgWeighted14d: Float!
-  itemCode: String!
-  perSkillRoll: [IntEntry!]!
-  totalDrops: Int!
+    avgWeighted14d: Float!
+    itemCode: String!
+    perSkillRoll: [IntEntry!]!
+    totalDrops: Int!
 }
 
 type CaseTransaction {
-  case: String!
-  id: ID!
-  item: Item
-  user: User!
+    case: String!
+    id: ID!
+    item: Item
+    user: User!
 }
 
 type CasesReport {
-  case: String!
-  expectedValue14d: Float!
-  perItem: [CaseItemStat!]!
-  totalOpened: Int!
-  uniqueItemCodes: [String!]!
-  updatedAt: DateTime!
+    case: String!
+    expectedValue14d: Float!
+    perItem: [CaseItemStat!]!
+    totalOpened: Int!
+    uniqueItemCodes: [String!]!
+    updatedAt: DateTime!
 }
 
 type Company {
-  employees: [Employee!]!
-  id: ID!
-  itemCode: String!
-  itemCodeHistory(after: ID, first: Int = 20): [CompanyItemCodeChange!]!
-  name: String!
-  owner: User
-  region: Region
-  regionHistory(after: ID, first: Int = 20): [CompanyRegionChange!]!
+    employees: [Employee!]!
+    id: ID!
+    itemCode: String!
+    itemCodeHistory(after: ID, first: Int = 20): [CompanyItemCodeChange!]!
+    name: String!
+    owner: User
+    region: Region
+    regionHistory(after: ID, first: Int = 20): [CompanyRegionChange!]!
 }
 
 type CompanyItemCodeChange {
-  at: DateTime!
-  company: Company!
-  id: ID!
-  itemCode: String!
+    at: DateTime!
+    company: Company!
+    id: ID!
+    itemCode: String!
 }
 
 type CompanyRegionChange {
-  at: DateTime!
-  company: Company!
-  id: ID!
-  region: Region!
+    at: DateTime!
+    company: Company!
+    id: ID!
+    region: Region!
 }
 
 type Country {
-  battles(after: ID, filter: BattleFilter = ALL, first: Int = 20): [Battle!]!
-  code: String!
-  flipEvents(
-    after: ID
-    first: Int = 50
-    from: DateTime!
-    to: DateTime!
-  ): [CountryFlipEvent!]!
-  flipState: CountryFlipState
-  id: ID!
-  inventory: CountryInventory
-  money: Float!
-  moneyFlows(from: DateTime!, to: DateTime!): [CountryMoneyFlowReport!]!
-  name: String!
-  orderChanges(after: ID, first: Int = 20): [BattleOrderChange!]!
-  parties(after: ID, first: Int = 20): [Party!]!
-  regions: [Region!]!
-  rulingParty: Party
-  rulingPartyHistory(after: ID, first: Int = 20): [CountryRulingPartyChange!]!
-  specialisation: String
-  specialisationHistory(
-    after: ID
-    first: Int = 20
-  ): [CountrySpecialisationChange!]!
-  taxFlows(from: DateTime!, to: DateTime!): [CountryTaxFlow!]!
-  taxes: Taxes!
-  userCount: Int!
-  users(after: ID, first: Int = 20): [User!]!
-  wealthReports(from: DateTime!, to: DateTime!): [EntityWealthReport!]!
+    battles(after: ID, filter: BattleFilter = ALL, first: Int = 20): [Battle!]!
+    code: String!
+    flipEvents(
+        after: ID
+        first: Int = 50
+        from: DateTime!
+        to: DateTime!
+    ): [CountryFlipEvent!]!
+    flipState: CountryFlipState
+    id: ID!
+    inventory: CountryInventory
+    money: Float!
+    moneyFlows(from: DateTime!, to: DateTime!): [CountryMoneyFlowReport!]!
+    name: String!
+    orderChanges(after: ID, first: Int = 20): [BattleOrderChange!]!
+    parties(after: ID, first: Int = 20): [Party!]!
+    regions: [Region!]!
+    rulingParty: Party
+    rulingPartyHistory(after: ID, first: Int = 20): [CountryRulingPartyChange!]!
+    specialisation: String
+    specialisationHistory(
+        after: ID
+        first: Int = 20
+    ): [CountrySpecialisationChange!]!
+    taxFlows(from: DateTime!, to: DateTime!): [CountryTaxFlow!]!
+    taxes: Taxes!
+    userCount: Int!
+    users(after: ID, first: Int = 20): [User!]!
+    wealthReports(from: DateTime!, to: DateTime!): [EntityWealthReport!]!
 }
 
 type CountryFlipEvent {
-  at: DateTime!
-  buyCost: Float!
-  country: Country!
-  id: ID!
-  itemCode: String!
-  profit: Float!
-  quantity: Int!
-  sellRevenue: Float!
+    at: DateTime!
+    buyCost: Float!
+    country: Country!
+    id: ID!
+    itemCode: String!
+    profit: Float!
+    quantity: Int!
+    sellRevenue: Float!
 }
 
 type CountryFlipState {
-  country: Country!
-  profitable: Int!
-  totalProfit: Float!
-  totalTrades: Int!
-  updatedAt: DateTime!
+    country: Country!
+    profitable: Int!
+    totalProfit: Float!
+    totalTrades: Int!
+    updatedAt: DateTime!
 }
 
 type CountryInventory {
-  country: Country!
-  lots: [InventoryLotGroup!]!
-  updatedAt: DateTime!
+    country: Country!
+    lots: [InventoryLotGroup!]!
+    updatedAt: DateTime!
 }
 
 type CountryMoneyFlowCounterpart {
-  country: Country!
-  inEquipment: Float!
-  inItems: Float!
-  inWages: Float!
-  outEquipment: Float!
-  outItems: Float!
-  outWages: Float!
+    country: Country!
+    inEquipment: Float!
+    inItems: Float!
+    inWages: Float!
+    outEquipment: Float!
+    outItems: Float!
+    outWages: Float!
 }
 
 type CountryMoneyFlowReport {
-  counterparts: [CountryMoneyFlowCounterpart!]!
-  country: Country!
-  dayStart: DateTime!
-  id: ID!
-  inEquipment: Float!
-  inEquipmentCrossBorder: Float!
-  inEquipmentDomestic: Float!
-  inItems: Float!
-  inItemsCrossBorder: Float!
-  inItemsDomestic: Float!
-  inWages: Float!
-  inWagesCrossBorder: Float!
-  inWagesDomestic: Float!
-  outEquipment: Float!
-  outEquipmentCrossBorder: Float!
-  outEquipmentDomestic: Float!
-  outItems: Float!
-  outItemsCrossBorder: Float!
-  outItemsDomestic: Float!
-  outWages: Float!
-  outWagesCrossBorder: Float!
-  outWagesDomestic: Float!
+    counterparts: [CountryMoneyFlowCounterpart!]!
+    country: Country!
+    dayStart: DateTime!
+    id: ID!
+    inEquipment: Float!
+    inEquipmentCrossBorder: Float!
+    inEquipmentDomestic: Float!
+    inItems: Float!
+    inItemsCrossBorder: Float!
+    inItemsDomestic: Float!
+    inWages: Float!
+    inWagesCrossBorder: Float!
+    inWagesDomestic: Float!
+    outEquipment: Float!
+    outEquipmentCrossBorder: Float!
+    outEquipmentDomestic: Float!
+    outItems: Float!
+    outItemsCrossBorder: Float!
+    outItemsDomestic: Float!
+    outWages: Float!
+    outWagesCrossBorder: Float!
+    outWagesDomestic: Float!
 }
 
 type CountryRulingPartyChange {
-  at: DateTime!
-  country: Country!
-  id: ID!
-  party: Party
+    at: DateTime!
+    country: Country!
+    id: ID!
+    party: Party
 }
 
 type CountrySpecialisationChange {
-  at: DateTime!
-  country: Country!
-  id: ID!
-  itemCode: String
+    at: DateTime!
+    country: Country!
+    id: ID!
+    itemCode: String
 }
 
 type CountryTaxFlow {
-  coreEarned: Float!
-  country: Country!
-  hijackedIn: Float!
-  hijackedOut: Float!
-  hijackers: [TaxHijack!]!
-  hourStart: DateTime!
-  id: ID!
-  nonCoreEarned: Float!
-  sources: [TaxSource!]!
-  totalTax: Float!
+    coreEarned: Float!
+    country: Country!
+    hijackedIn: Float!
+    hijackedOut: Float!
+    hijackers: [TaxHijack!]!
+    hourStart: DateTime!
+    id: ID!
+    nonCoreEarned: Float!
+    sources: [TaxSource!]!
+    totalTax: Float!
 }
 
 type CraftTransaction {
-  id: ID!
-  item: Item
-  scrapsCost: Int!
-  user: User!
+    id: ID!
+    item: Item
+    scrapsCost: Int!
+    user: User!
 }
 
 type Damage {
-  ammo: String
-  at: DateTime!
-  battle: Battle
-  boots: Item
-  chest: Item
-  country: Country
-  damages: Int!
-  gloves: Item
-  helmet: Item
-  id: ID!
-  militaryRank: Int!
-  mu: Mu
-  pants: Item
-  party: Party
-  side: Side!
-  skill: Skill
-  user: User
-  weapon: Item
+    ammo: String
+    at: DateTime!
+    battle: Battle
+    boots: Item
+    chest: Item
+    country: Country
+    damages: Int!
+    gloves: Item
+    helmet: Item
+    id: ID!
+    militaryRank: Int!
+    mu: Mu
+    pants: Item
+    party: Party
+    side: Side!
+    skill: Skill
+    user: User
+    weapon: Item
 }
 
 type DamageRanking {
-  battleCount: Int!
-  totalDamage: Int64!
-  user: User!
+    battleCount: Int!
+    totalDamage: Int64!
+    user: User!
 }
 
 scalar DateTime
 
 type DismantleReport {
-  count: Int!
-  hourStart: DateTime!
-  id: ID!
-  stateBuckets: [IntEntry!]!
+    count: Int!
+    hourStart: DateTime!
+    id: ID!
+    stateBuckets: [IntEntry!]!
 }
 
 type DismantleTransaction {
-  id: ID!
-  item: Item
-  scrapsReceived: Int!
-  user: User!
+    id: ID!
+    item: Item
+    scrapsReceived: Int!
+    user: User!
 }
 
 type EffectivePrice {
-  avgPrice: Float!
-  size: Int!
+    avgPrice: Float!
+    size: Int!
 }
 
 type Employee {
-  company: Company
-  employer: User
-  fidelity: Int!
-  id: ID!
-  joinedAt: DateTime!
-  lastFidelityIncreaseAt: DateTime!
-  user: User
-  wage: Float!
-  wageHistory(after: ID, first: Int = 20): [EmployeeWageChange!]!
+    company: Company
+    employer: User
+    fidelity: Int!
+    id: ID!
+    joinedAt: DateTime!
+    lastFidelityIncreaseAt: DateTime!
+    user: User
+    wage: Float!
+    wageHistory(after: ID, first: Int = 20): [EmployeeWageChange!]!
 }
 
 type EmployeeWageChange {
-  at: DateTime!
-  company: Company!
-  id: ID!
-  user: User!
-  wage: Float!
+    at: DateTime!
+    company: Company!
+    id: ID!
+    user: User!
+    wage: Float!
 }
 
 union Entity = Country | Mu | Party | User
 
 enum EntityKind {
-  COUNTRY
-  MU
-  PARTY
-  USER
+    COUNTRY
+    MU
+    PARTY
+    USER
 }
 
 type EntityWealthReport {
-  dayStart: DateTime!
-  entity: Entity
-  id: ID!
-  memberCount: Int!
-  totalDamage: Int64!
-  totalWealth: Float!
-  wagesEarned: Float!
-  wagesPaid: Float!
+    dayStart: DateTime!
+    entity: Entity
+    id: ID!
+    memberCount: Int!
+    totalDamage: Int64!
+    totalWealth: Float!
+    wagesEarned: Float!
+    wagesPaid: Float!
 }
 
 type EquipmentPricing {
-  itemCode: String!
-  skills: [EquipmentSkillPrice!]!
-  window: EquipmentWindowPrice
-  windowDays: Int!
+    itemCode: String!
+    skills: [EquipmentSkillPrice!]!
+    window: EquipmentWindowPrice
+    windowDays: Int!
 }
 
 type EquipmentSkillPrice {
-  avg: Float!
-  max: Float!
-  min: Float!
-  skillKey: String!
-  skills: [FloatEntry!]!
-  updatedAt: DateTime!
-  volume: Int!
+    avg: Float!
+    max: Float!
+    min: Float!
+    skillKey: String!
+    skills: [FloatEntry!]!
+    updatedAt: DateTime!
+    volume: Int!
 }
 
 type EquipmentUsage {
-  count: Float!
-  itemCode: String!
-  value: Float!
+    count: Float!
+    itemCode: String!
+    value: Float!
 }
 
 type EquipmentWindowPrice {
-  count: Int!
-  updatedAt: DateTime!
-  volume: Int!
-  weightedAvg: Float!
+    count: Int!
+    updatedAt: DateTime!
+    volume: Int!
+    weightedAvg: Float!
 }
 
 type Ethics {
-  imperialism: Int!
-  industrialism: Int!
-  isolationism: Int!
-  militarism: Int!
+    imperialism: Int!
+    industrialism: Int!
+    isolationism: Int!
+    militarism: Int!
 }
 
 type FlipLot {
-  boughtAt: DateTime!
-  quantity: Int!
-  tradeId: ID!
-  unitPrice: Float!
+    boughtAt: DateTime!
+    quantity: Int!
+    tradeId: ID!
+    unitPrice: Float!
 }
 
 type FlipLotGroup {
-  itemCode: String!
-  lots: [FlipLot!]!
+    itemCode: String!
+    lots: [FlipLot!]!
 }
 
 type FloatEntry {
-  key: String!
-  value: Float!
+    key: String!
+    value: Float!
 }
 
 type InflationPoint {
-  dayStart: DateTime!
-  id: ID!
-  indexValue: Float!
-  pctChange24h: Float!
-  perItem: [FloatEntry!]!
+    dayStart: DateTime!
+    id: ID!
+    indexValue: Float!
+    pctChange24h: Float!
+    perItem: [FloatEntry!]!
 }
 
 scalar Int64
 
 type IntEntry {
-  key: String!
-  value: Int!
+    key: String!
+    value: Int!
 }
 
 type InventoryLot {
-  boughtAt: DateTime!
-  quantity: Int!
-  tradeId: ID!
-  unitPrice: Float!
+    boughtAt: DateTime!
+    quantity: Int!
+    tradeId: ID!
+    unitPrice: Float!
 }
 
 type InventoryLotGroup {
-  itemCode: String!
-  lots: [InventoryLot!]!
+    itemCode: String!
+    lots: [InventoryLot!]!
 }
 
 type Item {
-  id: ID!
-  itemCode: String!
-  marketTransactions(after: ID, first: Int = 20): [MarketTransaction!]!
-  owner: User
-  skills: [FloatEntry!]!
-  state: Int!
-  status: ItemStatus!
+    id: ID!
+    itemCode: String!
+    marketTransactions(after: ID, first: Int = 20): [MarketTransaction!]!
+    owner: User
+    skills: [FloatEntry!]!
+    state: Int!
+    status: ItemStatus!
 }
 
 type ItemCandle {
-  avg: Float!
-  bucketStart: DateTime!
-  close: Float!
-  count: Int!
-  high: Float!
-  id: ID!
-  itemCode: String!
-  low: Float!
-  money: Float!
-  open: Float!
-  volume: Int!
+    avg: Float!
+    bucketStart: DateTime!
+    close: Float!
+    count: Int!
+    high: Float!
+    id: ID!
+    itemCode: String!
+    low: Float!
+    money: Float!
+    open: Float!
+    volume: Int!
 }
 
 type ItemMarketReport {
-  asks: [OrderbookLevel!]!
-  avgWeighted24h: Float!
-  bids: [OrderbookLevel!]!
-  effectiveBuy: [EffectivePrice!]!
-  effectiveSell: [EffectivePrice!]!
-  high24h: Float!
-  itemCode: String!
-  low24h: Float!
-  pctChange24h: Float!
-  spread: Float!
-  updatedAt: DateTime!
-  volume24h: Int!
+    asks: [OrderbookLevel!]!
+    avgWeighted24h: Float!
+    bids: [OrderbookLevel!]!
+    effectiveBuy: [EffectivePrice!]!
+    effectiveSell: [EffectivePrice!]!
+    high24h: Float!
+    itemCode: String!
+    low24h: Float!
+    pctChange24h: Float!
+    spread: Float!
+    updatedAt: DateTime!
+    volume24h: Int!
 }
 
 enum ItemStatus {
-  BROKEN
-  DISMANTLED
-  ONSALE
-  PERFECT
-  USED
+    BROKEN
+    DISMANTLED
+    ONSALE
+    PERFECT
+    USED
 }
 
 type LootTransaction {
-  id: ID!
-  item: Item
-  user: User!
+    id: ID!
+    item: Item
+    user: User!
 }
 
 type MarketState {
-  at: DateTime!
-  avgWage24h: Float!
-  marketVolume24h: Float!
-  wageAvgWeighted: Float!
-  wageMax: Float!
-  wageMin: Float!
-  wageVolume24h: Int!
+    at: DateTime!
+    avgWage24h: Float!
+    marketVolume24h: Float!
+    wageAvgWeighted: Float!
+    wageMax: Float!
+    wageMin: Float!
+    wageVolume24h: Int!
 }
 
 type MarketTransaction {
-  buyer: User!
-  id: ID!
-  item: Item
-  money: Float!
-  seller: User!
+    buyer: User!
+    id: ID!
+    item: Item
+    money: Float!
+    seller: User!
 }
 
 type Mu {
-  avatarUrl: String!
-  battles(after: ID, filter: BattleFilter = ALL, first: Int = 20): [Battle!]!
-  dorms: Int!
-  hq: Int!
-  id: ID!
-  level: Int!
-  members: [User!]!
-  mercRep: Float!
-  mercReputationHistory(
-    after: ID
-    first: Int = 20
-  ): [MuMercenaryReputationChange!]!
-  name: String!
-  nameHistory(after: ID, first: Int = 20): [MuNameChange!]!
-  orderChanges(after: ID, first: Int = 20): [BattleOrderChange!]!
-  owner: User
-  ownerHistory(after: ID, first: Int = 20): [MuOwnerChange!]!
-  region: Region
-  wealthReports(from: DateTime!, to: DateTime!): [EntityWealthReport!]!
+    avatarUrl: String!
+    battles(after: ID, filter: BattleFilter = ALL, first: Int = 20): [Battle!]!
+    dorms: Int!
+    hq: Int!
+    id: ID!
+    level: Int!
+    members: [User!]!
+    mercRep: Float!
+    mercReputationHistory(
+        after: ID
+        first: Int = 20
+    ): [MuMercenaryReputationChange!]!
+    name: String!
+    nameHistory(after: ID, first: Int = 20): [MuNameChange!]!
+    orderChanges(after: ID, first: Int = 20): [BattleOrderChange!]!
+    owner: User
+    ownerHistory(after: ID, first: Int = 20): [MuOwnerChange!]!
+    region: Region
+    wealthReports(from: DateTime!, to: DateTime!): [EntityWealthReport!]!
 }
 
 type MuCountryMoneyFlowCounterpart {
-  country: Country!
-  inEquipment: Float!
-  inItems: Float!
-  inWages: Float!
-  outEquipment: Float!
-  outItems: Float!
-  outWages: Float!
+    country: Country!
+    inEquipment: Float!
+    inItems: Float!
+    inWages: Float!
+    outEquipment: Float!
+    outItems: Float!
+    outWages: Float!
 }
 
 type MuCountryMoneyFlowReport {
-  counterparts: [MuCountryMoneyFlowCounterpart!]!
-  dayStart: DateTime!
-  id: ID!
-  inEquipment: Float!
-  inEquipmentCrossBorderOutsideMuCountry: Float!
-  inEquipmentInsideMu: Float!
-  inEquipmentSameCountryOutsideMu: Float!
-  inItems: Float!
-  inItemsCrossBorderOutsideMuCountry: Float!
-  inItemsInsideMu: Float!
-  inItemsSameCountryOutsideMu: Float!
-  inWages: Float!
-  inWagesCrossBorderOutsideMuCountry: Float!
-  inWagesInsideMu: Float!
-  inWagesSameCountryOutsideMu: Float!
-  mu: Mu!
-  outEquipment: Float!
-  outEquipmentCrossBorderOutsideMuCountry: Float!
-  outEquipmentInsideMu: Float!
-  outEquipmentSameCountryOutsideMu: Float!
-  outItems: Float!
-  outItemsCrossBorderOutsideMuCountry: Float!
-  outItemsInsideMu: Float!
-  outItemsSameCountryOutsideMu: Float!
-  outWages: Float!
-  outWagesCrossBorderOutsideMuCountry: Float!
-  outWagesInsideMu: Float!
-  outWagesSameCountryOutsideMu: Float!
+    counterparts: [MuCountryMoneyFlowCounterpart!]!
+    dayStart: DateTime!
+    id: ID!
+    inEquipment: Float!
+    inEquipmentCrossBorderOutsideMuCountry: Float!
+    inEquipmentInsideMu: Float!
+    inEquipmentSameCountryOutsideMu: Float!
+    inItems: Float!
+    inItemsCrossBorderOutsideMuCountry: Float!
+    inItemsInsideMu: Float!
+    inItemsSameCountryOutsideMu: Float!
+    inWages: Float!
+    inWagesCrossBorderOutsideMuCountry: Float!
+    inWagesInsideMu: Float!
+    inWagesSameCountryOutsideMu: Float!
+    mu: Mu!
+    outEquipment: Float!
+    outEquipmentCrossBorderOutsideMuCountry: Float!
+    outEquipmentInsideMu: Float!
+    outEquipmentSameCountryOutsideMu: Float!
+    outItems: Float!
+    outItemsCrossBorderOutsideMuCountry: Float!
+    outItemsInsideMu: Float!
+    outItemsSameCountryOutsideMu: Float!
+    outWages: Float!
+    outWagesCrossBorderOutsideMuCountry: Float!
+    outWagesInsideMu: Float!
+    outWagesSameCountryOutsideMu: Float!
 }
 
 type MuMercenaryReputationChange {
-  at: DateTime!
-  id: ID!
-  mercRep: Float!
-  mu: Mu!
+    at: DateTime!
+    id: ID!
+    mercRep: Float!
+    mu: Mu!
 }
 
 type MuNameChange {
-  at: DateTime!
-  id: ID!
-  mu: Mu!
-  name: String!
+    at: DateTime!
+    id: ID!
+    mu: Mu!
+    name: String!
 }
 
 type MuOwnerChange {
-  at: DateTime!
-  id: ID!
-  mu: Mu!
-  owner: User!
+    at: DateTime!
+    id: ID!
+    mu: Mu!
+    owner: User!
 }
 
 type OrderBook {
-  asks: [OrderBookLevel!]!
-  bids: [OrderBookLevel!]!
-  itemCode: String!
+    asks: [OrderBookLevel!]!
+    bids: [OrderBookLevel!]!
+    itemCode: String!
 }
 
 type OrderBookLevel {
-  price: Float!
-  remaining: Int!
+    price: Float!
+    remaining: Int!
 }
 
 type OrderbookLevel {
-  price: Float!
-  quantity: Int!
+    price: Float!
+    quantity: Int!
 }
 
 type Party {
-  avatarUrl: String!
-  battles(after: ID, first: Int = 20): [Battle!]!
-  country: Country
-  description: String!
-  descriptionHistory(after: ID, first: Int = 20): [PartyDescriptionChange!]!
-  ethics: Ethics!
-  ethicsHistory(after: ID, first: Int = 20): [PartyEthicsChange!]!
-  id: ID!
-  lastUpdated: DateTime!
-  leader: User
-  leaderHistory(after: ID, first: Int = 20): [PartyLeaderChange!]!
-  members: [User!]!
-  moneyCountryFlows(
-    from: DateTime!
-    to: DateTime!
-  ): [MuCountryMoneyFlowReport!]!
-  name: String!
-  nameHistory(after: ID, first: Int = 20): [PartyNameChange!]!
-  participation: PartyBattleParticipation
-  region: Region
-  rulesCountries: [Country!]!
-  wealthReports(from: DateTime!, to: DateTime!): [EntityWealthReport!]!
+    avatarUrl: String!
+    battles(after: ID, first: Int = 20): [Battle!]!
+    country: Country
+    description: String!
+    descriptionHistory(after: ID, first: Int = 20): [PartyDescriptionChange!]!
+    ethics: Ethics!
+    ethicsHistory(after: ID, first: Int = 20): [PartyEthicsChange!]!
+    id: ID!
+    lastUpdated: DateTime!
+    leader: User
+    leaderHistory(after: ID, first: Int = 20): [PartyLeaderChange!]!
+    members: [User!]!
+    moneyCountryFlows(
+        from: DateTime!
+        to: DateTime!
+    ): [MuCountryMoneyFlowReport!]!
+    name: String!
+    nameHistory(after: ID, first: Int = 20): [PartyNameChange!]!
+    participation: PartyBattleParticipation
+    region: Region
+    rulesCountries: [Country!]!
+    wealthReports(from: DateTime!, to: DateTime!): [EntityWealthReport!]!
 }
 
 type PartyBattleParticipation {
-  battleCount: Int!
-  party: Party!
-  totalDamage: Int64!
+    battleCount: Int!
+    party: Party!
+    totalDamage: Int64!
 }
 
 type PartyDescriptionChange {
-  at: DateTime!
-  description: String!
-  id: ID!
-  party: Party!
+    at: DateTime!
+    description: String!
+    id: ID!
+    party: Party!
 }
 
 type PartyEthicsChange {
-  at: DateTime!
-  ethics: Ethics!
-  id: ID!
-  party: Party!
+    at: DateTime!
+    ethics: Ethics!
+    id: ID!
+    party: Party!
 }
 
 type PartyLeaderChange {
-  at: DateTime!
-  id: ID!
-  leader: User!
-  party: Party!
+    at: DateTime!
+    id: ID!
+    leader: User!
+    party: Party!
 }
 
 type PartyNameChange {
-  at: DateTime!
-  id: ID!
-  name: String!
-  party: Party!
+    at: DateTime!
+    id: ID!
+    name: String!
+    party: Party!
 }
 
 type Query {
-  battle(id: ID!): Battle
-  battles(after: ID, filter: BattleFilter = ALL, first: Int = 20): [Battle!]!
-  casesReports: [CasesReport!]!
-  company(id: ID!): Company
-  countries: [Country!]!
-  country(id: ID!): Country
-  dismantleReports(from: DateTime!, to: DateTime!): [DismantleReport!]!
-  equipmentPricing(itemCode: String!, windowDays: Int!): EquipmentPricing
-  inflation(from: DateTime!, to: DateTime!): [InflationPoint!]!
-  item(id: ID!): Item
-  itemCandles(from: DateTime!, itemCode: String!, to: DateTime!): [ItemCandle!]!
-  itemMarketReport(itemCode: String!): ItemMarketReport
-  latestMarketState: MarketState
-  latestWageMarketState: WageMarketState
-  marketStates(from: DateTime!, to: DateTime!): [MarketState!]!
-  mu(id: ID!): Mu
-  mus(activeOnly: Boolean = true, after: ID, first: Int = 20): [Mu!]!
-  orderBook(itemCode: String!): OrderBook!
-  parties(activeOnly: Boolean = true, after: ID, first: Int = 20): [Party!]!
-  party(id: ID!): Party
-  region(id: ID!): Region
-  regions: [Region!]!
-  search(limit: Int = 10, term: String!): [SearchResult!]!
-  topDamage(from: DateTime!, limit: Int = 10, to: DateTime!): [DamageRanking!]!
-  topFlippers(limit: Int = 10): [UserFlipState!]!
-  topWageEarners(
-    from: DateTime!
-    limit: Int = 10
-    to: DateTime!
-  ): [WageRanking!]!
-  topWagePayers(
-    from: DateTime!
-    limit: Int = 10
-    to: DateTime!
-  ): [WageRanking!]!
-  tradeOffer(id: ID!): TradeOffer
-  user(id: ID!): User
-  wageCandles(from: DateTime!, to: DateTime!): [WageCandle!]!
-  wageMarketStates(from: DateTime!, to: DateTime!): [WageMarketState!]!
+    battle(id: ID!): Battle
+    battles(after: ID, filter: BattleFilter = ALL, first: Int = 20): [Battle!]!
+    casesReports: [CasesReport!]!
+    company(id: ID!): Company
+    countries: [Country!]!
+    country(id: ID!): Country
+    dismantleReports(from: DateTime!, to: DateTime!): [DismantleReport!]!
+    equipmentPricing(itemCode: String!, windowDays: Int!): EquipmentPricing
+    inflation(from: DateTime!, to: DateTime!): [InflationPoint!]!
+    item(id: ID!): Item
+    itemCandles(
+        from: DateTime!
+        itemCode: String!
+        to: DateTime!
+    ): [ItemCandle!]!
+    itemMarketReport(itemCode: String!): ItemMarketReport
+    latestInflation: InflationPoint
+    latestItemCandle(itemCode: String!): ItemCandle
+    latestMarketState: MarketState
+    latestWageCandle: WageCandle
+    latestWageMarketState: WageMarketState
+    marketStates(from: DateTime!, to: DateTime!): [MarketState!]!
+    mu(id: ID!): Mu
+    mus(activeOnly: Boolean = true, after: ID, first: Int = 20): [Mu!]!
+    orderBook(itemCode: String!): OrderBook!
+    parties(activeOnly: Boolean = true, after: ID, first: Int = 20): [Party!]!
+    party(id: ID!): Party
+    region(id: ID!): Region
+    regions: [Region!]!
+    search(limit: Int = 10, term: String!): [SearchResult!]!
+    topDamage(
+        from: DateTime!
+        limit: Int = 10
+        to: DateTime!
+    ): [DamageRanking!]!
+    topFlippers(limit: Int = 10): [UserFlipState!]!
+    topWageEarners(
+        from: DateTime!
+        limit: Int = 10
+        to: DateTime!
+    ): [WageRanking!]!
+    topWagePayers(
+        from: DateTime!
+        limit: Int = 10
+        to: DateTime!
+    ): [WageRanking!]!
+    tradeOffer(id: ID!): TradeOffer
+    user(id: ID!): User
+    wageCandles(from: DateTime!, to: DateTime!): [WageCandle!]!
+    wageMarketStates(from: DateTime!, to: DateTime!): [WageMarketState!]!
 }
 
 type Region {
-  activeBattles: [Battle!]!
-  battles(after: ID, filter: BattleFilter = ALL, first: Int = 20): [Battle!]!
-  companies(after: ID, first: Int = 20): [Company!]!
-  country: Country
-  deposits(after: ID, first: Int = 20): [RegionDeposit!]!
-  id: ID!
-  initialCountry: Country
-  isCapital: Boolean!
-  isLinkedToCapital: Boolean!
-  maxResistance: Float!
-  mus: [Mu!]!
-  name: String!
-  neighbors: [Region!]!
-  ownerHistory(after: ID, first: Int = 20): [RegionOwnerChange!]!
-  parties: [Party!]!
-  resistance: Float!
-  strategicResources(after: ID, first: Int = 20): [RegionStrategicResource!]!
+    activeBattles: [Battle!]!
+    battles(after: ID, filter: BattleFilter = ALL, first: Int = 20): [Battle!]!
+    companies(after: ID, first: Int = 20): [Company!]!
+    country: Country
+    deposits(after: ID, first: Int = 20): [RegionDeposit!]!
+    id: ID!
+    initialCountry: Country
+    isCapital: Boolean!
+    isLinkedToCapital: Boolean!
+    maxResistance: Float!
+    mus: [Mu!]!
+    name: String!
+    neighbors: [Region!]!
+    ownerHistory(after: ID, first: Int = 20): [RegionOwnerChange!]!
+    parties: [Party!]!
+    resistance: Float!
+    strategicResources(after: ID, first: Int = 20): [RegionStrategicResource!]!
 }
 
 type RegionDeposit {
-  at: DateTime!
-  bonusPercent: Float
-  endsAt: DateTime
-  id: ID!
-  region: Region!
-  startsAt: DateTime
-  type: String
+    at: DateTime!
+    bonusPercent: Float
+    endsAt: DateTime
+    id: ID!
+    region: Region!
+    startsAt: DateTime
+    type: String
 }
 
 type RegionOwnerChange {
-  at: DateTime!
-  country: Country!
-  id: ID!
-  region: Region!
+    at: DateTime!
+    country: Country!
+    id: ID!
+    region: Region!
 }
 
 type RegionStrategicResource {
-  at: DateTime!
-  id: ID!
-  region: Region!
-  resource: String
+    at: DateTime!
+    id: ID!
+    region: Region!
+    resource: String
 }
 
 union SearchResult = Country | Mu | Party | User
 
 enum Side {
-  ATTACKER
-  DEFENDER
+    ATTACKER
+    DEFENDER
 }
 
 type Skill {
-  id: ID!
-  set: SkillSet!
-  since: DateTime!
-  user: User
+    id: ID!
+    set: SkillSet!
+    since: DateTime!
+    user: User
 }
 
 type SkillSet {
-  armor: Int!
-  attack: Int!
-  companies: Int!
-  criticalChance: Int!
-  criticalDamages: Int!
-  dodge: Int!
-  energy: Int!
-  entrepreneurship: Int!
-  health: Int!
-  hunger: Int!
-  lootChance: Int!
-  management: Int!
-  precision: Int!
-  production: Int!
+    armor: Int!
+    attack: Int!
+    companies: Int!
+    criticalChance: Int!
+    criticalDamages: Int!
+    dodge: Int!
+    energy: Int!
+    entrepreneurship: Int!
+    health: Int!
+    hunger: Int!
+    lootChance: Int!
+    management: Int!
+    precision: Int!
+    production: Int!
 }
 
 type TaxHijack {
-  amount: Float!
-  country: Country
+    amount: Float!
+    country: Country
 }
 
 type TaxSource {
-  corePct: Float!
-  country: Country
-  hijacked: Float!
-  total: Float!
+    corePct: Float!
+    country: Country
+    hijacked: Float!
+    total: Float!
 }
 
 type Taxes {
-  income: Float!
-  market: Float!
-  selfWork: Float!
+    income: Float!
+    market: Float!
+    selfWork: Float!
 }
 
 type TradeOffer {
-  cancelled: Boolean!
-  country: Country
-  fulfilled: Int!
-  id: ID!
-  itemCode: String!
-  mu: Mu
-  price: Float!
-  quantity: Int!
-  side: TradeSide!
-  since: DateTime!
-  user: User
+    cancelled: Boolean!
+    country: Country
+    fulfilled: Int!
+    id: ID!
+    itemCode: String!
+    mu: Mu
+    price: Float!
+    quantity: Int!
+    side: TradeSide!
+    since: DateTime!
+    user: User
 }
 
 enum TradeSide {
-  BUY
-  SELL
+    BUY
+    SELL
 }
 
 type TradeTransaction {
-  buyer: User!
-  buyerCountry: Country
-  buyerMu: Mu
-  id: ID!
-  itemCode: String!
-  money: Float!
-  quantity: Int!
-  seller: User!
-  sellerCountry: Country
-  sellerMu: Mu
-  timeTillSale: Int64!
+    buyer: User!
+    buyerCountry: Country
+    buyerMu: Mu
+    id: ID!
+    itemCode: String!
+    money: Float!
+    quantity: Int!
+    seller: User!
+    sellerCountry: Country
+    sellerMu: Mu
+    timeTillSale: Int64!
 }
 
 type User {
-  allDamages(after: ID, first: Int = 20): [Damage!]!
-  avatarUrl: String!
-  battleParticipation: UserBattleParticipation
-  battles(after: ID, first: Int = 20): [Battle!]!
-  company: Company
-  companyHistory(after: ID, first: Int = 20): [UserCompanyChange!]!
-  country: Country
-  countryHistory(after: ID, first: Int = 20): [UserCountryChange!]!
-  damages(battleId: ID!): [Damage!]!
-  employment: Employee
-  financeReports(from: DateTime!, to: DateTime!): [UserFinanceReport!]!
-  flipEvents(
-    after: ID
-    first: Int = 50
-    from: DateTime!
-    to: DateTime!
-  ): [UserFlipEvent!]!
-  flipState: UserFlipState
-  id: ID!
-  inventory: UserInventory
-  items(after: ID, first: Int = 20, status: ItemStatus): [Item!]!
-  lastDate: DateTime!
-  lastSeen: DateTime!
-  latestSkills: Skill
-  level: Int!
-  militaryRank: Int!
-  mu: Mu
-  muHistory(after: ID, first: Int = 20): [UserMuChange!]!
-  nameHistory(after: ID, first: Int = 20): [UserNameChange!]!
-  ownedCompanies: [Company!]!
-  party: Party
-  partyHistory(after: ID, first: Int = 20): [UserPartyChange!]!
-  skillChangeHistory(after: ID, first: Int = 20): [UserSkillChange!]!
-  skillSnapshots(after: ID, first: Int = 20): [Skill!]!
-  skills: [IntEntry!]!
-  tradeOffers(
-    after: ID
-    first: Int = 20
-    itemCode: String
-    side: TradeSide
-  ): [TradeOffer!]!
-  transactions(after: ID, first: Int = 20): ActivityConnection!
-  username: String!
-  wageHistory(after: ID, first: Int = 20): [EmployeeWageChange!]!
-  wealth: [FloatEntry!]!
+    allDamages(after: ID, first: Int = 20): [Damage!]!
+    avatarUrl: String!
+    battleParticipation: UserBattleParticipation
+    battles(after: ID, first: Int = 20): [Battle!]!
+    company: Company
+    companyHistory(after: ID, first: Int = 20): [UserCompanyChange!]!
+    country: Country
+    countryHistory(after: ID, first: Int = 20): [UserCountryChange!]!
+    damages(battleId: ID!): [Damage!]!
+    employment: Employee
+    financeReports(from: DateTime!, to: DateTime!): [UserFinanceReport!]!
+    flipEvents(
+        after: ID
+        first: Int = 50
+        from: DateTime!
+        to: DateTime!
+    ): [UserFlipEvent!]!
+    flipState: UserFlipState
+    id: ID!
+    inventory: UserInventory
+    items(after: ID, first: Int = 20, status: ItemStatus): [Item!]!
+    lastDate: DateTime!
+    lastSeen: DateTime!
+    latestSkills: Skill
+    level: Int!
+    militaryRank: Int!
+    mu: Mu
+    muHistory(after: ID, first: Int = 20): [UserMuChange!]!
+    nameHistory(after: ID, first: Int = 20): [UserNameChange!]!
+    ownedCompanies: [Company!]!
+    party: Party
+    partyHistory(after: ID, first: Int = 20): [UserPartyChange!]!
+    skillChangeHistory(after: ID, first: Int = 20): [UserSkillChange!]!
+    skillSnapshots(after: ID, first: Int = 20): [Skill!]!
+    skills: [IntEntry!]!
+    tradeOffers(
+        after: ID
+        first: Int = 20
+        itemCode: String
+        side: TradeSide
+    ): [TradeOffer!]!
+    transactions(after: ID, first: Int = 20): ActivityConnection!
+    username: String!
+    wageHistory(after: ID, first: Int = 20): [EmployeeWageChange!]!
+    wealth: [FloatEntry!]!
 }
 
 type UserBattleParticipation {
-  battlesParticipated: Int!
-  muOrderBattles: Int!
-  muOrderParticipated: Int!
-  negativeDamage: Int64!
-  ownCountryBattles: Int!
-  ownCountryParticipated: Int!
-  totalDamage: Int64!
-  updatedAt: DateTime!
-  user: User!
+    battlesParticipated: Int!
+    muOrderBattles: Int!
+    muOrderParticipated: Int!
+    negativeDamage: Int64!
+    ownCountryBattles: Int!
+    ownCountryParticipated: Int!
+    totalDamage: Int64!
+    updatedAt: DateTime!
+    user: User!
 }
 
 type UserCompanyChange {
-  at: DateTime!
-  company: Company
-  id: ID!
-  user: User!
+    at: DateTime!
+    company: Company
+    id: ID!
+    user: User!
 }
 
 type UserCountryChange {
-  at: DateTime!
-  country: Country
-  id: ID!
-  user: User!
+    at: DateTime!
+    country: Country
+    id: ID!
+    user: User!
 }
 
 type UserFinanceReport {
-  casesNet: Float!
-  casesOpened: Int!
-  dayStart: DateTime!
-  equipBought: Float!
-  equipSold: Float!
-  id: ID!
-  itemsBought: Float!
-  itemsSold: Float!
-  user: User!
-  valueDismantled: Float!
-  wagesEarned: Float!
-  wagesPaid: Float!
+    casesNet: Float!
+    casesOpened: Int!
+    dayStart: DateTime!
+    equipBought: Float!
+    equipSold: Float!
+    id: ID!
+    itemsBought: Float!
+    itemsSold: Float!
+    user: User!
+    valueDismantled: Float!
+    wagesEarned: Float!
+    wagesPaid: Float!
 }
 
 type UserFlipEvent {
-  at: DateTime!
-  buyCost: Float!
-  heldMs: Int64!
-  id: ID!
-  itemCode: String!
-  profit: Float!
-  quantity: Int!
-  sellRevenue: Float!
-  user: User!
+    at: DateTime!
+    buyCost: Float!
+    heldMs: Int64!
+    id: ID!
+    itemCode: String!
+    profit: Float!
+    quantity: Int!
+    sellRevenue: Float!
+    user: User!
 }
 
 type UserFlipState {
-  openLots: [FlipLotGroup!]!
-  totalFlips: Int!
-  totalProfit: Float!
-  updatedAt: DateTime!
-  user: User!
+    openLots: [FlipLotGroup!]!
+    totalFlips: Int!
+    totalProfit: Float!
+    updatedAt: DateTime!
+    user: User!
 }
 
 type UserInventory {
-  items: [IntEntry!]!
-  updatedAt: DateTime!
-  user: User!
+    items: [IntEntry!]!
+    updatedAt: DateTime!
+    user: User!
 }
 
 type UserMuChange {
-  at: DateTime!
-  id: ID!
-  mu: Mu
-  user: User!
+    at: DateTime!
+    id: ID!
+    mu: Mu
+    user: User!
 }
 
 type UserNameChange {
-  at: DateTime!
-  id: ID!
-  user: User!
-  username: String!
+    at: DateTime!
+    id: ID!
+    user: User!
+    username: String!
 }
 
 type UserPartyChange {
-  at: DateTime!
-  id: ID!
-  party: Party
-  user: User!
+    at: DateTime!
+    id: ID!
+    party: Party
+    user: User!
 }
 
 type UserSkillChange {
-  at: DateTime!
-  id: ID!
-  skills: [IntEntry!]!
-  user: User!
+    at: DateTime!
+    id: ID!
+    skills: [IntEntry!]!
+    user: User!
 }
 
 type WageCandle {
-  avg: Float!
-  bucketStart: DateTime!
-  close: Float!
-  count: Int!
-  high: Float!
-  id: ID!
-  low: Float!
-  money: Float!
-  open: Float!
-  volume: Int!
+    avg: Float!
+    bucketStart: DateTime!
+    close: Float!
+    count: Int!
+    high: Float!
+    id: ID!
+    low: Float!
+    money: Float!
+    open: Float!
+    volume: Int!
 }
 
 type WageMarketState {
-  at: DateTime!
-  avgWeighted14d: Float!
-  max14d: Float!
-  min14d: Float!
-  top10Least24h: [WagePaidUser!]!
-  top10Most24h: [WagePaidUser!]!
-  totalPaid14d: Float!
+    at: DateTime!
+    avgWeighted14d: Float!
+    max14d: Float!
+    min14d: Float!
+    top10Least24h: [WagePaidUser!]!
+    top10Most24h: [WagePaidUser!]!
+    totalPaid14d: Float!
 }
 
 type WagePaidUser {
-  totalPaid: Float!
-  user: User!
+    totalPaid: Float!
+    user: User!
 }
 
 type WageRanking {
-  count: Int!
-  total: Float!
-  user: User!
+    count: Int!
+    total: Float!
+    user: User!
 }
 
 type WageTransaction {
-  employee: User!
-  employer: User!
-  id: ID!
-  money: Float!
-  productionPoints: Int!
+    employee: User!
+    employer: User!
+    id: ID!
+    money: Float!
+    productionPoints: Int!
 }

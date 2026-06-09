@@ -1,39 +1,39 @@
 {
-  "name": "ui",
-  "private": true,
-  "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "preview": "vite preview",
-    "prepare": "svelte-kit sync || echo ''",
-    "houdini:generate": "houdini generate",
-    "houdini:pull-schema": "houdini pull-schema",
-    "cf:dev": "pnpm build ; wrangler pages dev .svelte-kit/cloudflare",
-    "cf:deploy": "pnpm build ; wrangler pages deploy .svelte-kit/cloudflare",
-    "cf:deploy:pages": "wrangler pages deploy .svelte-kit/cloudflare --project-name warerastats-ui",
-    "cf:deploy:worker": "pnpm build ; wrangler deploy .svelte-kit/cloudflare/_worker.js --assets .svelte-kit/cloudflare --name warerastats-ui",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
-  },
-  "devDependencies": {
-    "@sveltejs/adapter-cloudflare": "^7.2.8",
-    "@sveltejs/kit": "^2.21.0",
-    "@sveltejs/vite-plugin-svelte": "^5.1.1",
-    "houdini": "1.5.10",
-    "houdini-svelte": "2.1.20",
-    "prettier": "^3.8.3",
-    "prettier-plugin-svelte": "^4.1.0",
-    "svelte": "^5.55.2",
-    "svelte-check": "^4.4.6",
-    "typescript": "^6.0.2",
-    "vite": "^6.0.3",
-    "wrangler": "^4.98.0"
-  },
-  "dependencies": {
-    "graphql": "^16.14.1"
-  }
+    "name": "ui",
+    "private": true,
+    "version": "0.0.1",
+    "type": "module",
+    "scripts": {
+        "dev": "vite dev",
+        "build": "vite build",
+        "preview": "vite preview",
+        "prepare": "svelte-kit sync || echo ''",
+        "houdini:generate": "houdini generate",
+        "houdini:pull-schema": "houdini pull-schema",
+        "cf:dev": "pnpm build ; wrangler pages dev .svelte-kit/cloudflare",
+        "cf:deploy": "pnpm build ; wrangler pages deploy .svelte-kit/cloudflare",
+        "cf:deploy:pages": "wrangler pages deploy .svelte-kit/cloudflare --project-name warerastats-ui",
+        "cf:deploy:worker": "pnpm build ; wrangler deploy .svelte-kit/cloudflare/_worker.js --assets .svelte-kit/cloudflare --name warerastats-ui",
+        "format": "prettier --write .",
+        "format:check": "prettier --check .",
+        "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+        "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+    },
+    "devDependencies": {
+        "@sveltejs/adapter-cloudflare": "^7.2.8",
+        "@sveltejs/kit": "^2.21.0",
+        "@sveltejs/vite-plugin-svelte": "^5.1.1",
+        "houdini": "1.5.10",
+        "houdini-svelte": "2.1.20",
+        "prettier": "^3.8.3",
+        "prettier-plugin-svelte": "^4.1.0",
+        "svelte": "^5.55.2",
+        "svelte-check": "^4.4.6",
+        "typescript": "^6.0.2",
+        "vite": "^6.0.3",
+        "wrangler": "^4.98.0"
+    },
+    "dependencies": {
+        "graphql": "^16.14.1"
+    }
 }
