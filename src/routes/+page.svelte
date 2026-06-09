@@ -1,21 +1,6 @@
 <script lang="ts">
+    import type { SearchApiResponse, SearchResultItem } from "$lib";
     import type { PageData } from "./$types";
-
-    type SearchResultItem =
-        | { __typename: "Country"; id: string; name: string; code: string }
-        | { __typename: "Mu"; id: string; name: string; avatarUrl: string }
-        | { __typename: "Party"; id: string; name: string; avatarUrl: string }
-        | {
-              __typename: "User";
-              id: string;
-              username: string;
-              avatarUrl: string;
-          };
-
-    type SearchApiResponse = {
-        results: SearchResultItem[];
-        error?: string;
-    };
 
     let { data }: { data: PageData } = $props();
     let searchTerm = $state("");
@@ -149,12 +134,18 @@
     </section>
 
     <section>
-        <h2>Latest Inflation</h2>
-        {#if data.latestInflation}
-            <p>Day start: {data.latestInflation.dayStart}</p>
-            <p>24h change: {data.latestInflation.pctChange24h}%</p>
+        <h2>Inflation (Last 30 Full UTC Days)</h2>
+        {#if data.inflation.length === 0}
+            <p>No inflation points available for the selected window.</p>
         {:else}
-            <p>No inflation point available.</p>
+            <ul>
+                {#each data.inflation as point (point.dayStart)}
+                    <li>
+                        <p>Day start: {point.dayStart}</p>
+                        <p>24h change: {point.pctChange24h}%</p>
+                    </li>
+                {/each}
+            </ul>
         {/if}
     </section>
 

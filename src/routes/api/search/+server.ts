@@ -1,16 +1,7 @@
 import { json } from "@sveltejs/kit";
+import type { SearchResponse, SearchResultItem } from "$lib";
 import type { RequestHandler } from "./$types";
 import { runGraphQL } from "$lib/server/graphql/client";
-
-type SearchResultItem =
-    | { __typename: "Country"; id: string; name: string; code: string }
-    | { __typename: "Mu"; id: string; name: string; avatarUrl: string }
-    | { __typename: "Party"; id: string; name: string; avatarUrl: string }
-    | { __typename: "User"; id: string; username: string; avatarUrl: string };
-
-interface SearchResponse {
-    search: SearchResultItem[];
-}
 
 const SEARCH_QUERY = `
   query Search($term: String!, $limit: Int) {
