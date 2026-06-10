@@ -1,6 +1,7 @@
 import type {
     BattleSummary,
     InflationPoint,
+    ItemHourlySeries,
     MarketState,
     SearchResultItem,
 } from "./models";
@@ -27,6 +28,21 @@ export type IndexPageLoadFailure = {
 };
 
 export type IndexPageLoadData = IndexPageLoadSuccess | IndexPageLoadFailure;
+
+export type ItemsPageLoadSuccess = {
+    ok: true;
+    items: ItemHourlySeries[];
+};
+
+export type ItemsPageLoadFailure = {
+    ok: false;
+    error: string;
+    items: ItemHourlySeries[];
+};
+
+export type ItemsPageLoadData = ItemsPageLoadSuccess | ItemsPageLoadFailure;
+
+export type ItemsQueryResult = Record<string, unknown>;
 
 export interface SearchResponse {
     search: SearchResultItem[];

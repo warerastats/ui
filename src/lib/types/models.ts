@@ -26,6 +26,19 @@ export type InflationPoint = {
     pctChange24h: number;
 };
 
+export type ItemMarketReportSummary = {
+    itemCode: string;
+    volume24h: number;
+    avgWeighted24h: number;
+    pctChange24h: number;
+};
+
+export type ItemHourlySeries = {
+    itemCode: string;
+    report: ItemMarketReportSummary | null;
+    hourlyAvgPrices: number[];
+};
+
 export type SearchResultItem =
     | { __typename: "Country"; id: string; name: string; code: string }
     | { __typename: "Mu"; id: string; name: string; avatarUrl: string }
