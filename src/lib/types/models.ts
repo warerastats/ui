@@ -39,6 +39,80 @@ export type ItemHourlySeries = {
     hourlyAvgPrices: number[];
 };
 
+export type ItemOrderbookLevel = {
+    price: number;
+    quantity: number;
+};
+
+export type ItemEffectivePrice = {
+    size: number;
+    avgPrice: number;
+};
+
+export type ItemMarketReport = {
+    itemCode: string;
+    volume24h: number;
+    avgWeighted24h: number;
+    pctChange24h: number;
+    low24h: number;
+    high24h: number;
+    spread: number;
+    bids: ItemOrderbookLevel[];
+    asks: ItemOrderbookLevel[];
+    effectiveBuy: ItemEffectivePrice[];
+    effectiveSell: ItemEffectivePrice[];
+    updatedAt: string;
+};
+
+export type ItemCandle = {
+    bucketStart: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    avg: number;
+    volume: number;
+    money: number;
+    count: number;
+};
+
+export type TradeTransactionEdge = {
+    __typename: "TradeTransaction";
+    money: number;
+    quantity: number;
+    timeTillSale: number;
+    seller: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+    buyer: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+    sellerMu: {
+        id: string;
+        name: string;
+        avatarUrl: string;
+    } | null;
+    buyerMu: {
+        id: string;
+        name: string;
+        avatarUrl: string;
+    } | null;
+    sellerCountry: {
+        id: string;
+        name: string;
+        code: string;
+    } | null;
+    buyerCountry: {
+        id: string;
+        name: string;
+        code: string;
+    } | null;
+};
+
 export type SearchResultItem =
     | { __typename: "Country"; id: string; name: string; code: string }
     | { __typename: "Mu"; id: string; name: string; avatarUrl: string }

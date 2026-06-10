@@ -1,9 +1,12 @@
 import type {
     BattleSummary,
     InflationPoint,
+    ItemCandle,
     ItemHourlySeries,
+    ItemMarketReport,
     MarketState,
     SearchResultItem,
+    TradeTransactionEdge,
 } from "./models";
 
 export type IndexQueryResult = {
@@ -43,6 +46,46 @@ export type ItemsPageLoadFailure = {
 export type ItemsPageLoadData = ItemsPageLoadSuccess | ItemsPageLoadFailure;
 
 export type ItemsQueryResult = Record<string, unknown>;
+
+export type ItemDetailQueryResult = {
+    itemMarketReport: ItemMarketReport | null;
+    itemCandles: ItemCandle[];
+    transactions: {
+        edges: TradeTransactionEdge[];
+    };
+};
+
+export type ItemDetailPageLoadSuccess = {
+    ok: true;
+    itemCode: string;
+    marketReport: ItemMarketReport | null;
+    candles: ItemCandle[];
+    transactions: TradeTransactionEdge[];
+};
+
+export type ItemDetailPageLoadFailure = {
+    ok: false;
+    itemCode: string;
+    error: string;
+    marketReport: null;
+    candles: ItemCandle[];
+    transactions: TradeTransactionEdge[];
+};
+
+export type ItemDetailPageLoadData =
+    | ItemDetailPageLoadSuccess
+    | ItemDetailPageLoadFailure;
+
+export type ItemTransactionsQueryResult = {
+    transactions: {
+        edges: TradeTransactionEdge[];
+    };
+};
+
+export type ItemTransactionsApiResponse = {
+    results: TradeTransactionEdge[];
+    error?: string;
+};
 
 export interface SearchResponse {
     search: SearchResultItem[];

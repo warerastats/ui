@@ -2,10 +2,15 @@ export type {
     BattleSummary,
     CountrySummary,
     InflationPoint,
+    ItemCandle,
+    ItemEffectivePrice,
     ItemHourlySeries,
+    ItemMarketReport,
     ItemMarketReportSummary,
+    ItemOrderbookLevel,
     MarketState,
     SearchResultItem,
+    TradeTransactionEdge,
 } from "./models";
 
 export type {
@@ -13,6 +18,12 @@ export type {
     IndexPageLoadFailure,
     IndexPageLoadSuccess,
     IndexQueryResult,
+    ItemDetailPageLoadData,
+    ItemDetailPageLoadFailure,
+    ItemDetailPageLoadSuccess,
+    ItemDetailQueryResult,
+    ItemTransactionsApiResponse,
+    ItemTransactionsQueryResult,
     ItemsPageLoadData,
     ItemsPageLoadFailure,
     ItemsPageLoadSuccess,

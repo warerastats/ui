@@ -807,6 +807,7 @@ type Query {
   topWageEarners(from: DateTime!, limit: Int = 10, to: DateTime!): [WageRanking!]!
   topWagePayers(from: DateTime!, limit: Int = 10, to: DateTime!): [WageRanking!]!
   tradeOffer(id: ID!): TradeOffer
+  transactions(after: ID, first: Int = 20, itemCode: String!): ActivityConnection!
   user(id: ID!): User
   wageCandles(from: DateTime!, to: DateTime!): [WageCandle!]!
   wageMarketStates(from: DateTime!, to: DateTime!): [WageMarketState!]!
