@@ -9,6 +9,7 @@ import type {
     MarketState,
     Mu,
     Party,
+    Region,
     User,
     SearchResultItem,
     TradeTransactionEdge,
@@ -197,3 +198,22 @@ export type BattlePageLoadFailure = {
 };
 
 export type BattlePageLoadData = BattlePageLoadSuccess | BattlePageLoadFailure;
+
+export type RegionQueryResult = {
+    region: Region;
+};
+
+export type RegionPageLoadSuccess = {
+    ok: true;
+    id: string;
+    region: Region;
+};
+
+export type RegionPageLoadFailure = {
+    ok: false;
+    id: string;
+    error: string;
+    region: null;
+};
+
+export type RegionPageLoadData = RegionPageLoadSuccess | RegionPageLoadFailure;

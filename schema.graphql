@@ -325,6 +325,9 @@ type CountrySpecialisationChange {
 type CountryTaxFlow {
   coreEarned: Float!
   country: Country!
+  foreignTaxIn: Float!
+  foreignTaxOut: Float!
+  foreignTaxRecipients: [ForeignTaxRecipient!]!
   hijackedIn: Float!
   hijackedOut: Float!
   hijackers: [TaxHijack!]!
@@ -486,6 +489,11 @@ type FlipLotGroup {
 type FloatEntry {
   key: String!
   value: Float!
+}
+
+type ForeignTaxRecipient {
+  amount: Float!
+  country: Country
 }
 
 type InflationPoint {
@@ -943,6 +951,7 @@ type TaxHijack {
 type TaxSource {
   corePct: Float!
   country: Country
+  foreignTaxRedirected: Float!
   hijacked: Float!
   total: Float!
 }

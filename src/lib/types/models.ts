@@ -704,3 +704,88 @@ export type User = {
     flipState: FlipState;
     battleParticipation: BattleParticipation;
 };
+
+export type RegionCountry = {
+    id: string;
+    name: string;
+    code: string;
+    specialisation: string | null;
+    regions: RegionCountryRegion[];
+    rulingParty: RegionRulingParty | null;
+};
+
+export type RegionCountryRegion = {
+    strategicResources: RegionStrategicResourceEntry[];
+};
+
+export type RegionEthics = {
+    unethical: number;
+    militarism: number;
+    isolationism: number;
+    imperialism: number;
+    industrialism: number;
+};
+
+export type RegionRulingParty = {
+    ethics: RegionEthics;
+};
+
+export type RegionNeighbor = {
+    country: RegionCountry;
+};
+
+export type RegionParty = {
+    id: string;
+    name: string;
+    avatarUrl: string;
+};
+
+export type RegionMu = {
+    id: string;
+    name: string;
+    avatarUrl: string;
+};
+
+export type RegionCompany = {
+    itemCode: string;
+};
+
+export type RegionBattle = {
+    attackerCountry: RegionCountry | null;
+    defenderCountry: RegionCountry | null;
+    winnerSide: string | null;
+    attackerDamages: number;
+    defenderDamages: number;
+};
+
+export type RegionOwnerHistoryEntry = {
+    at: string;
+    country: RegionCountry;
+};
+
+export type RegionDepositEntry = {
+    at: string;
+    startsAt: string;
+    endsAt: string;
+    type: string;
+};
+
+export type RegionStrategicResourceEntry = {
+    at: string;
+    resource: string;
+};
+
+export type Region = {
+    name: string;
+    isCapital: boolean;
+    country: RegionCountry | null;
+    initialCountry: RegionCountry | null;
+    neighbors: RegionNeighbor[];
+    parties: RegionParty[];
+    mus: RegionMu[];
+    companies: RegionCompany[];
+    battles: RegionBattle[];
+    ownerHistory: RegionOwnerHistoryEntry[];
+    deposits: RegionDepositEntry[];
+    strategicResources: RegionStrategicResourceEntry[];
+};
