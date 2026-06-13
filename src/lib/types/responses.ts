@@ -8,6 +8,7 @@ import type {
     MarketState,
     Mu,
     Party,
+    User,
     SearchResultItem,
     TradeTransactionEdge,
 } from "./models";
@@ -157,3 +158,22 @@ export type PartyPageLoadFailure = {
 };
 
 export type PartyPageLoadData = PartyPageLoadSuccess | PartyPageLoadFailure;
+
+export type UserQueryResult = {
+    user: User;
+};
+
+export type UserPageLoadSuccess = {
+    ok: true;
+    id: string;
+    user: User;
+};
+
+export type UserPageLoadFailure = {
+    ok: false;
+    id: string;
+    error: string;
+    user: null;
+};
+
+export type UserPageLoadData = UserPageLoadSuccess | UserPageLoadFailure;

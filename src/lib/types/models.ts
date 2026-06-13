@@ -349,3 +349,290 @@ export type Party = {
     wealthReports: PartyWealthReport[];
     moneyFlows: PartyMoneyFlow[];
 };
+
+export type UserSkill = {
+    key: string;
+    value: number;
+};
+
+export type UserCountry = {
+    id: string;
+    name: string;
+    code: string;
+};
+
+export type UserParty = {
+    id: string;
+    name: string;
+    avatarUrl: string;
+};
+
+export type UserMu = {
+    id: string;
+    name: string;
+    avatarUrl: string;
+};
+
+export type MarketTransaction = {
+    __typename: "MarketTransaction";
+    id: string;
+    money: number;
+    item: {
+        itemCode: string;
+        skills: UserSkill[];
+    };
+    seller: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+    buyer: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+};
+
+export type CaseTransaction = {
+    __typename: "CaseTransaction";
+    id: string;
+    case: string;
+    item: {
+        itemCode: string;
+        skills: UserSkill[];
+    };
+};
+
+export type TradeTransaction = {
+    __typename: "TradeTransaction";
+    id: string;
+    itemCode: string;
+    quantity: number;
+    money: number;
+    seller: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+    buyer: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+    sellerMu: {
+        id: string;
+        name: string;
+        avatarUrl: string;
+    } | null;
+    buyerMu: {
+        id: string;
+        name: string;
+        avatarUrl: string;
+    } | null;
+    sellerCountry: {
+        id: string;
+        name: string;
+        code: string;
+    } | null;
+    buyerCountry: {
+        id: string;
+        name: string;
+        code: string;
+    } | null;
+};
+
+export type CraftTransaction = {
+    __typename: "CraftTransaction";
+    id: string;
+    item: {
+        itemCode: string;
+        skills: UserSkill[];
+    };
+};
+
+export type LootTransaction = {
+    __typename: "LootTransaction";
+    id: string;
+    item: {
+        itemCode: string;
+        skills: UserSkill[];
+    };
+};
+
+export type UserTransaction =
+    | MarketTransaction
+    | CaseTransaction
+    | TradeTransaction
+    | CraftTransaction
+    | LootTransaction;
+
+export type UserBattle = {
+    id: string;
+    defenderRegion: {
+        name: string;
+    } | null;
+    attackerCountry: {
+        id: string;
+        name: string;
+        code: string;
+    } | null;
+    defenderCountry: {
+        id: string;
+        name: string;
+        code: string;
+    } | null;
+};
+
+export type UserItem = {
+    itemCode: string;
+};
+
+export type CompanyEmployee = {
+    wage: number;
+    fidelity: number;
+    user: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+};
+
+export type CompanyRegion = {
+    id: string;
+    name: string;
+    country: {
+        code: string;
+    };
+    initialCountry: {
+        code: string;
+    };
+};
+
+export type OwnedCompany = {
+    id: string;
+    name: string;
+    itemCode: string;
+    region: CompanyRegion;
+    employees: CompanyEmployee[];
+};
+
+export type TradeOffer = {
+    itemCode: string;
+    side: string;
+    quantity: number;
+    fulfilled: number;
+    cancelled: boolean;
+    price: number;
+    since: string;
+};
+
+export type SkillSnapshot = {
+    since: string;
+    set: {
+        energy: number;
+        health: number;
+        hunger: number;
+        attack: number;
+        companies: number;
+        entrepreneurship: number;
+        production: number;
+        criticalChance: number;
+        criticalDamages: number;
+        armor: number;
+        precision: number;
+        dodge: number;
+        lootChance: number;
+        management: number;
+    };
+};
+
+export type UserNameHistoryEntry = {
+    at: string;
+    username: string;
+};
+
+export type UserCountryHistoryEntry = {
+    at: string;
+    country: UserCountry;
+};
+
+export type UserMuHistoryEntry = {
+    at: string;
+    mu: UserMu;
+};
+
+export type UserPartyHistoryEntry = {
+    at: string;
+    party: UserParty;
+};
+
+export type UserWageHistoryEntry = {
+    at: string;
+    wage: number;
+};
+
+export type FinanceReport = {
+    dayStart: string;
+    wagesPaid: number;
+    wagesEarned: number;
+    itemsBought: number;
+    itemsSold: number;
+    equipBought: number;
+    equipSold: number;
+    valueDismantled: number;
+    casesOpened: number;
+    casesNet: number;
+};
+
+export type FlipEvent = {
+    itemCode: string;
+    quantity: number;
+    buyCost: number;
+    sellRevenue: number;
+    profit: number;
+    heldMs: number;
+    at: string;
+};
+
+export type FlipState = {
+    totalFlips: number;
+    totalProfit: number;
+};
+
+export type BattleParticipation = {
+    totalDamage: number;
+    battlesParticipated: number;
+    negativeDamage: number;
+    ownCountryBattles: number;
+    ownCountryParticipated: number;
+    muOrderBattles: number;
+    muOrderParticipated: number;
+    updatedAt: string;
+};
+
+export type User = {
+    username: string;
+    level: number;
+    militaryRank: string;
+    avatarUrl: string;
+    skills: UserSkill[];
+    country: UserCountry | null;
+    party: UserParty | null;
+    mu: UserMu | null;
+    transactions: UserTransaction[];
+    battles: UserBattle[];
+    perfectItems: UserItem[];
+    usedItems: UserItem[];
+    ownedCompanies: OwnedCompany[];
+    tradeOffers: TradeOffer[];
+    skillSnapshots: SkillSnapshot[];
+    nameHistory: UserNameHistoryEntry[];
+    countryHistory: UserCountryHistoryEntry[];
+    muHistory: UserMuHistoryEntry[];
+    partyHistory: UserPartyHistoryEntry[];
+    wageHistory: UserWageHistoryEntry[];
+    financeReports: FinanceReport[];
+    flipEvents: FlipEvent[];
+    flipState: FlipState;
+    battleParticipation: BattleParticipation;
+};
