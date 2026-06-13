@@ -234,3 +234,118 @@ export type Mu = {
     ownerHistory: MuOwnerHistoryEntry[];
     wealthReports: MuWealthReport[];
 };
+
+export type PartyEthics = {
+    unethical: number;
+    militarism: number;
+    isolationism: number;
+    imperialism: number;
+    industrialism: number;
+};
+
+export type PartyCountry = {
+    id: string;
+    name: string;
+    code: string;
+};
+
+export type PartyRegionCountry = {
+    code: string;
+};
+
+export type PartyRegion = {
+    id: string;
+    name: string;
+    country: PartyRegionCountry | null;
+    initialCountry: PartyRegionCountry | null;
+};
+
+export type PartyUser = {
+    id: string;
+    username: string;
+    avatarUrl: string;
+};
+
+export type PartyNameHistoryEntry = {
+    at: string;
+    name: string;
+};
+
+export type PartyLeaderHistoryEntry = {
+    at: string;
+    leader: PartyUser;
+};
+
+export type PartyEthicsHistoryEntry = {
+    at: string;
+    ethics: PartyEthics;
+};
+
+export type PartyWealthReport = {
+    dayStart: string;
+    memberCount: number;
+    totalDamage: number;
+    totalWealth: number;
+};
+
+export type PartyMoneyFlowCounterpart = {
+    country: PartyCountry;
+    inEquipment: number;
+    outEquipment: number;
+    inItems: number;
+    outItems: number;
+    inWages: number;
+    outWages: number;
+};
+
+export type PartyMoneyFlow = {
+    dayStart: string;
+    inEquipment: number;
+    inEquipmentInsideParty: number;
+    inEquipmentOutsideAlliance: number;
+    inEquipmentSameCountryOutsideParty: number;
+    inEquipmentSameAllianceCrossBorder: number;
+    outEquipment: number;
+    outEquipmentInsideParty: number;
+    outEquipmentOutsideAlliance: number;
+    outEquipmentSameCountryOutsideParty: number;
+    outEquipmentSameAllianceCrossBorder: number;
+    inItems: number;
+    inItemsInsideParty: number;
+    inItemsOutsideAlliance: number;
+    inItemsSameCountryOutsideParty: number;
+    inItemsSameAllianceCrossBorder: number;
+    outItems: number;
+    outItemsInsideParty: number;
+    outItemsOutsideAlliance: number;
+    outItemsSameCountryOutsideParty: number;
+    outItemsSameAllianceCrossBorder: number;
+    inWages: number;
+    inWagesInsideParty: number;
+    inWagesOutsideAlliance: number;
+    inWagesSameCountryOutsideParty: number;
+    inWagesSameAllianceCrossBorder: number;
+    outWages: number;
+    outWagesInsideParty: number;
+    outWagesOutsideAlliance: number;
+    outWagesSameCountryOutsideParty: number;
+    outWagesSameAllianceCrossBorder: number;
+    counterparts: PartyMoneyFlowCounterpart[];
+};
+
+export type Party = {
+    name: string;
+    description: string;
+    avatarUrl: string;
+    ethics: PartyEthics;
+    country: PartyCountry | null;
+    region: PartyRegion | null;
+    leader: PartyUser | null;
+    members: PartyUser[];
+    rulesCountries: PartyCountry[];
+    nameHistory: PartyNameHistoryEntry[];
+    leaderHistory: PartyLeaderHistoryEntry[];
+    ethicsHistory: PartyEthicsHistoryEntry[];
+    wealthReports: PartyWealthReport[];
+    moneyFlows: PartyMoneyFlow[];
+};

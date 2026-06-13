@@ -731,7 +731,7 @@ type Party {
   leader: User
   leaderHistory(after: ID, first: Int = 20): [PartyLeaderChange!]!
   members: [User!]!
-  moneyCountryFlows(from: DateTime!, to: DateTime!): [MuCountryMoneyFlowReport!]!
+  moneyFlows(from: DateTime!, to: DateTime!): [PartyMoneyFlowReport!]!
   name: String!
   nameHistory(after: ID, first: Int = 20): [PartyNameChange!]!
   participation: PartyBattleParticipation
@@ -764,6 +764,53 @@ type PartyLeaderChange {
   at: DateTime!
   id: ID!
   leader: User!
+  party: Party!
+}
+
+type PartyMoneyFlowCounterpart {
+  country: Country!
+  inEquipment: Float!
+  inItems: Float!
+  inWages: Float!
+  outEquipment: Float!
+  outItems: Float!
+  outWages: Float!
+}
+
+type PartyMoneyFlowReport {
+  counterparts: [PartyMoneyFlowCounterpart!]!
+  dayStart: DateTime!
+  id: ID!
+  inEquipment: Float!
+  inEquipmentInsideParty: Float!
+  inEquipmentOutsideAlliance: Float!
+  inEquipmentSameAllianceCrossBorder: Float!
+  inEquipmentSameCountryOutsideParty: Float!
+  inItems: Float!
+  inItemsInsideParty: Float!
+  inItemsOutsideAlliance: Float!
+  inItemsSameAllianceCrossBorder: Float!
+  inItemsSameCountryOutsideParty: Float!
+  inWages: Float!
+  inWagesInsideParty: Float!
+  inWagesOutsideAlliance: Float!
+  inWagesSameAllianceCrossBorder: Float!
+  inWagesSameCountryOutsideParty: Float!
+  outEquipment: Float!
+  outEquipmentInsideParty: Float!
+  outEquipmentOutsideAlliance: Float!
+  outEquipmentSameAllianceCrossBorder: Float!
+  outEquipmentSameCountryOutsideParty: Float!
+  outItems: Float!
+  outItemsInsideParty: Float!
+  outItemsOutsideAlliance: Float!
+  outItemsSameAllianceCrossBorder: Float!
+  outItemsSameCountryOutsideParty: Float!
+  outWages: Float!
+  outWagesInsideParty: Float!
+  outWagesOutsideAlliance: Float!
+  outWagesSameAllianceCrossBorder: Float!
+  outWagesSameCountryOutsideParty: Float!
   party: Party!
 }
 
