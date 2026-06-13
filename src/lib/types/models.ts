@@ -12,6 +12,74 @@ export type BattleSummary = {
     defenderDamages: number;
 };
 
+export type BattleCountry = {
+    id: string;
+    name: string;
+    code: string;
+};
+
+export type BattleRegion = {
+    id: string;
+    name: string;
+    country: BattleCountry;
+    initialCountry: BattleCountry;
+};
+
+export type BattleAlliance = {
+    id: string;
+    name: string;
+};
+
+export type BattleTopDamageEntry = {
+    totalDamage: number;
+    user: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+};
+
+export type BattleOrderChangeEntity =
+    | { __typename: "Country"; id: string; name: string; code: string }
+    | { __typename: "Mu"; id: string; name: string; avatarUrl: string };
+
+export type BattleOrderChange = {
+    at: string;
+    side: string;
+    kind: string;
+    action: string;
+    entity: BattleOrderChangeEntity;
+};
+
+export type DamageReportEquipment = {
+    itemCode: string;
+    count: number;
+    value: number;
+};
+
+export type DamageReport = {
+    intervalStart: string;
+    side: string;
+    damage: number;
+    equipment: DamageReportEquipment[];
+};
+
+export type Battle = {
+    attackerDamages: number;
+    defenderDamages: number;
+    winnerSide: string | null;
+    isActive: boolean;
+    endedAt: string | null;
+    attackerCountry: BattleCountry | null;
+    defenderCountry: BattleCountry | null;
+    defenderRegion: BattleRegion | null;
+    attackerAlliance: BattleAlliance | null;
+    defenderAlliance: BattleAlliance | null;
+    topDamage: BattleTopDamageEntry[];
+    orderChanges: BattleOrderChange[];
+    damageReports: DamageReport[];
+};
+
 export type MarketState = {
     avgWage24h: number;
     wageVolume24h: number;

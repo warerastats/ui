@@ -1,5 +1,6 @@
 import type {
     Alliance,
+    Battle,
     BattleSummary,
     InflationPoint,
     ItemCandle,
@@ -177,3 +178,22 @@ export type UserPageLoadFailure = {
 };
 
 export type UserPageLoadData = UserPageLoadSuccess | UserPageLoadFailure;
+
+export type BattleQueryResult = {
+    battle: Battle;
+};
+
+export type BattlePageLoadSuccess = {
+    ok: true;
+    id: string;
+    battle: Battle;
+};
+
+export type BattlePageLoadFailure = {
+    ok: false;
+    id: string;
+    error: string;
+    battle: null;
+};
+
+export type BattlePageLoadData = BattlePageLoadSuccess | BattlePageLoadFailure;
