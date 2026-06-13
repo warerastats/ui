@@ -123,3 +123,57 @@ export type SearchResultItem =
           username: string;
           avatarUrl: string;
       };
+
+export type AllianceCountry = {
+    id: string;
+    name: string;
+    code: string;
+    userCount: number;
+};
+
+export type AllianceParticipation = {
+    totalDamage: number;
+    battleCount: number;
+};
+
+export type AllianceTopDamageUser = {
+    id: string;
+    username: string;
+    avatarUrl: string;
+};
+
+export type AllianceTopDamageEntry = {
+    user: AllianceTopDamageUser;
+    totalDamage: number;
+    battleCount: number;
+};
+
+export type AllianceMoneyFlow = {
+    dayStart: string;
+    inEquipment: number;
+    outEquipment: number;
+    inItems: number;
+    outItems: number;
+    inWages: number;
+    outWages: number;
+    inEquipmentInAlliance: number;
+    outEquipmentInAlliance: number;
+    inEquipmentOutsideAlliance: number;
+    outEquipmentOutsideAlliance: number;
+    inItemsInAlliance: number;
+    outItemsInAlliance: number;
+    inItemsOutsideAlliance: number;
+    outItemsOutsideAlliance: number;
+    inWagesInAlliance: number;
+    outWagesInAlliance: number;
+    inWagesOutsideAlliance: number;
+    outWagesOutsideAlliance: number;
+};
+
+export type Alliance = {
+    name: string;
+    countries: AllianceCountry[];
+    participation: AllianceParticipation;
+    topDamage: AllianceTopDamageEntry[];
+    moneyFlows: AllianceMoneyFlow[];
+};

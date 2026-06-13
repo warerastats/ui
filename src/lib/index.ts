@@ -1,6 +1,16 @@
 // place files you want to import through the `$lib` alias in this folder.
 
 export type {
+    Alliance,
+    AllianceCountry,
+    AllianceMoneyFlow,
+    AlliancePageLoadData,
+    AlliancePageLoadFailure,
+    AlliancePageLoadSuccess,
+    AllianceParticipation,
+    AllianceQueryResult,
+    AllianceTopDamageEntry,
+    AllianceTopDamageUser,
     BattleSummary,
     CountrySummary,
     IndexPageLoadData,

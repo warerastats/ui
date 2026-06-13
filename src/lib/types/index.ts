@@ -1,4 +1,10 @@
 export type {
+    Alliance,
+    AllianceCountry,
+    AllianceMoneyFlow,
+    AllianceParticipation,
+    AllianceTopDamageEntry,
+    AllianceTopDamageUser,
     BattleSummary,
     CountrySummary,
     InflationPoint,
@@ -14,6 +20,10 @@ export type {
 } from "./models";
 
 export type {
+    AlliancePageLoadData,
+    AlliancePageLoadFailure,
+    AlliancePageLoadSuccess,
+    AllianceQueryResult,
     IndexPageLoadData,
     IndexPageLoadFailure,
     IndexPageLoadSuccess,

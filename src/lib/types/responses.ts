@@ -1,4 +1,5 @@
 import type {
+    Alliance,
     BattleSummary,
     InflationPoint,
     ItemCandle,
@@ -95,3 +96,24 @@ export type SearchApiResponse = {
     results: SearchResultItem[];
     error?: string;
 };
+
+export type AllianceQueryResult = {
+    alliance: Alliance;
+};
+
+export type AlliancePageLoadSuccess = {
+    ok: true;
+    id: string;
+    alliance: Alliance;
+};
+
+export type AlliancePageLoadFailure = {
+    ok: false;
+    id: string;
+    error: string;
+    alliance: null;
+};
+
+export type AlliancePageLoadData =
+    | AlliancePageLoadSuccess
+    | AlliancePageLoadFailure;
