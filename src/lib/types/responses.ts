@@ -6,6 +6,7 @@ import type {
     ItemHourlySeries,
     ItemMarketReport,
     MarketState,
+    Mu,
     SearchResultItem,
     TradeTransactionEdge,
 } from "./models";
@@ -117,3 +118,22 @@ export type AlliancePageLoadFailure = {
 export type AlliancePageLoadData =
     | AlliancePageLoadSuccess
     | AlliancePageLoadFailure;
+
+export type MuQueryResult = {
+    mu: Mu;
+};
+
+export type MuPageLoadSuccess = {
+    ok: true;
+    id: string;
+    mu: Mu;
+};
+
+export type MuPageLoadFailure = {
+    ok: false;
+    id: string;
+    error: string;
+    mu: null;
+};
+
+export type MuPageLoadData = MuPageLoadSuccess | MuPageLoadFailure;

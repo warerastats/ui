@@ -177,3 +177,60 @@ export type Alliance = {
     topDamage: AllianceTopDamageEntry[];
     moneyFlows: AllianceMoneyFlow[];
 };
+
+export type MuUser = {
+    id: string;
+    username: string;
+    avatarUrl: string;
+};
+
+export type MuRegionCountry = {
+    code: string;
+};
+
+export type MuRegion = {
+    id: string;
+    name: string;
+    country: MuRegionCountry | null;
+    initialCountry: MuRegionCountry | null;
+};
+
+export type MuOrderChange = {
+    at: string;
+    action: string;
+    battle: {
+        id: string;
+        defenderRegion: MuRegion | null;
+    };
+};
+
+export type MuNameHistoryEntry = {
+    at: string;
+    name: string;
+};
+
+export type MuOwnerHistoryEntry = {
+    at: string;
+    owner: MuUser;
+};
+
+export type MuWealthReport = {
+    dayStart: string;
+    totalDamage: number;
+    totalWealth: number;
+};
+
+export type Mu = {
+    name: string;
+    avatarUrl: string;
+    hq: number;
+    dorms: number;
+    mercRep: number;
+    owner: MuUser | null;
+    region: MuRegion | null;
+    members: MuUser[];
+    orderChanges: MuOrderChange[];
+    nameHistory: MuNameHistoryEntry[];
+    ownerHistory: MuOwnerHistoryEntry[];
+    wealthReports: MuWealthReport[];
+};
