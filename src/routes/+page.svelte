@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { SearchApiResponse, SearchResultItem } from "$lib";
     import Card from "$lib/components/Card.svelte";
+    import InflationChart from "$lib/components/InflationChart.svelte";
     import Search from "$lib/components/Search.svelte";
     import Wrapper from "$lib/components/Wrapper.svelte";
     import { formatMoney } from "$lib/helpers";
@@ -142,6 +143,16 @@
         </div>
     {/if}
 
+    {#if data.inflation.length > 0}
+        <div style="margin: 0 8px; margin-top: 24px;">
+            <Wrapper>
+                <div class="inflation-row">
+                    <InflationChart points={data.inflation} />
+                </div>
+            </Wrapper>
+        </div>
+    {/if}
+
 {/if}
 
 <h1>WareraStats UI</h1>
@@ -251,6 +262,11 @@
     div.cards-3 {
         display: flex;
         gap: 24px;
+    }
+
+    div.inflation-row {
+        // 2 stat-card widths: 2 × (W - 2×24px) / 3 + 1 gap
+        width: calc((100% - 48px) * 2 / 3 + 24px);
     }
 
     .stat-header {
