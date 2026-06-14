@@ -14,7 +14,7 @@
         "cf:deploy": "pnpm build ; wrangler pages deploy .svelte-kit/cloudflare",
         "cf:deploy:pages": "wrangler pages deploy .svelte-kit/cloudflare --project-name warerastats-ui",
         "cf:deploy:worker": "pnpm build ; wrangler deploy .svelte-kit/cloudflare/_worker.js --assets .svelte-kit/cloudflare --name warerastats-ui",
-        "format": "prettier 'src/**/*.{js,ts,mjs,cjs,json,.svelte}' --write",
+        "format": "prettier 'src/**/*.{js,ts,mjs,cjs,json,.svelte,.html}' --write",
         "format:check": "prettier --check .",
         "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
         "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
@@ -27,6 +27,7 @@
         "houdini-svelte": "2.1.20",
         "prettier": "^3.8.3",
         "prettier-plugin-svelte": "^4.1.0",
+        "sass-embedded": "^1.100.0",
         "svelte": "^5.55.2",
         "svelte-check": "^4.4.6",
         "typescript": "^6.0.2",
