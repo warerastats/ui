@@ -98,30 +98,42 @@
                 {#each searchResults as item}
                     {#if item.__typename === "User"}
                         <a href={`/user/${item.id}`}>
-                            <div>
+                            <div class="result-row">
                                 <UserAvatar src={item.avatarUrl} alt={item.username+"'s avatar"} height="48px" width="48px"/>
-                                {item.username}
+                                <div class="result-copy">
+                                    <span>{item.username}</span>
+                                    <span class="result-type">user</span>
+                                </div>
                             </div>
                         </a>
                     {:else if item.__typename === "Country"}
                         <a href={`/country/${item.id}`}>
-                            <div>
+                            <div class="result-row">
                                 <CountryFlag code={item.code} height="48px" width="48px"/>
-                                {item.name}
+                                <div class="result-copy">
+                                    <span>{item.name}</span>
+                                    <span class="result-type">country</span>
+                                </div>
                             </div>
                         </a>
                     {:else if item.__typename === "Mu"}
                         <a href={`/mu/${item.id}`}>
-                            <div>
+                            <div class="result-row">
                                 <UserAvatar src={item.avatarUrl} alt={item.name+"'s avatar"} height="48px" width="48px"/>
-                                {item.name}
+                                <div class="result-copy">
+                                    <span>{item.name}</span>
+                                    <span class="result-type">mu</span>
+                                </div>
                             </div>
                         </a>
                     {:else if item.__typename === "Party"}
                         <a href={`/party/${item.id}`}>
-                            <div>
+                            <div class="result-row">
                                 <UserAvatar src={item.avatarUrl} alt={item.name+"'s avatar"} height="48px" width="48px"/>
-                                {item.name}
+                                <div class="result-copy">
+                                    <span>{item.name}</span>
+                                    <span class="result-type">party</span>
+                                </div>
                             </div>
                         </a>
                     {/if}
@@ -154,7 +166,7 @@
             text-decoration: none;
         }
 
-        & div {
+        & div.result-row {
             padding: 6px 6px;
             display: flex;
             align-items: center;
@@ -167,6 +179,21 @@
             &:hover {
                 background-color: rgba($color: #ffffff, $alpha: 0.05);
             }
+        }
+
+        & div.result-copy {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            padding: 0;
+        }
+
+        & span.result-type {
+            color: #8c909f;
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
         }
     }
 
