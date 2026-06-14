@@ -1,5 +1,7 @@
 <script lang="ts">
     import type { SearchApiResponse, SearchResultItem } from "$lib";
+    import Search from "$lib/components/Search.svelte";
+    import Wrapper from "$lib/components/Wrapper.svelte";
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
@@ -70,6 +72,12 @@
         };
     });
 </script>
+
+<div style="margin: 0 8px; margin-top: 60px;">
+    <Wrapper>
+        <Search />
+    </Wrapper>
+</div>
 
 <h1>WareraStats UI</h1>
 <p>This page loads GraphQL data through server-only code.</p>
