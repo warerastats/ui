@@ -1,7 +1,9 @@
 <script lang="ts">
     import type { SearchApiResponse, SearchResultItem } from "$lib";
+    import Card from "$lib/components/Card.svelte";
     import Search from "$lib/components/Search.svelte";
     import Wrapper from "$lib/components/Wrapper.svelte";
+    import { formatMoney } from "$lib/helpers";
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
@@ -78,6 +80,69 @@
         <Search />
     </Wrapper>
 </div>
+
+{#if data.ok}
+
+    {#if data.latestMarketState}
+        <div style="margin: 0 8px; margin-top: 48px;">
+            <Wrapper>
+                <div class="cards-3">
+                    <Card>
+                        {#snippet header()}
+                            <div class="stat-header">
+                                <div class="left">
+                                    Avg wage (24h)
+                                </div>
+                            </div>
+                        {/snippet}
+
+                        <p class="stat">
+                            <span class="big">
+                                {formatMoney(data.latestMarketState.avgWage24h)}
+                            </span>
+                            btc
+                        </p>
+                    </Card>
+
+                    <Card>
+                        {#snippet header()}
+                            <div class="stat-header">
+                                <div class="left">
+                                    Total wages (24h)
+                                </div>
+                            </div>
+                        {/snippet}
+
+                        <p class="stat">
+                            <span class="big">
+                                {formatMoney(data.latestMarketState.wageVolume24h, 0)}
+                            </span>
+                            btc
+                        </p>
+                    </Card>
+
+                    <Card>
+                        {#snippet header()}
+                            <div class="stat-header">
+                                <div class="left">
+                                    Trade volume (24h)
+                                </div>
+                            </div>
+                        {/snippet}
+
+                        <p class="stat">
+                            <span class="big">
+                                {formatMoney(data.latestMarketState.marketVolume24h, 0)}
+                            </span>
+                            btc
+                        </p>
+                    </Card>
+                </div>
+            </Wrapper>
+        </div>
+    {/if}
+
+{/if}
 
 <h1>WareraStats UI</h1>
 <p>This page loads GraphQL data through server-only code.</p>
@@ -181,3 +246,38 @@
 {:else}
     <p>GraphQL check failed: {data.error}</p>
 {/if}
+
+<style lang="scss">
+    div.cards-3 {
+        display: flex;
+        gap: 24px;
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+
+        .left {
+            color: #C2C6D6;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 600;
+        }
+    }
+
+    p.stat {
+        margin: 0;
+        color: #8C909F;
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+
+        .big {
+            font-size: 30px;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            padding-right: 2px;
+        }
+    }
+</style>
