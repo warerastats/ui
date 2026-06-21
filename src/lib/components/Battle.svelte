@@ -1,21 +1,9 @@
 <script lang="ts">
+    import { formatCompactNumber } from "$lib/helpers";
     import type { BattleSummary } from "$lib/types";
     import CountryFlag from "./CountryFlag.svelte";
 
     let { battle }: { battle: BattleSummary } = $props();
-
-    function formatDamage(damage: number): string {
-        if (damage >= 1_000_000_000) {
-            return (damage / 1_000_000_000).toFixed(1) + "B";
-        }
-        if (damage >= 1_000_000) {
-            return (damage / 1_000_000).toFixed(1) + "M";
-        }
-        if (damage >= 1_000) {
-            return (damage / 1_000).toFixed(1) + "K";
-        }
-        return damage.toString();
-    }
 
     // svelte-ignore state_referenced_locally
     const isAttackerWinner = battle.winnerSide === "attacker";
@@ -46,7 +34,7 @@
                     >
                 </div>
                 <div class="damage">
-                    {formatDamage(battle.attackerDamages)}
+                    {formatCompactNumber(battle.attackerDamages)}
                 </div>
             </div>
 
@@ -68,7 +56,7 @@
                     >
                 </div>
                 <div class="damage">
-                    {formatDamage(battle.defenderDamages)}
+                    {formatCompactNumber(battle.defenderDamages)}
                 </div>
             </div>
         </div>
