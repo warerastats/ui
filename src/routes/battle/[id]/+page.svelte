@@ -1,6 +1,13 @@
 <script lang="ts">
+    import Card from "$lib/components/Card.svelte";
     import CountryFlag from "$lib/components/CountryFlag.svelte";
-    import { formatCompactNumber } from "$lib/helpers";
+    import ItemImage from "$lib/components/ItemImage.svelte";
+    import Wrapper from "$lib/components/Wrapper.svelte";
+    import {
+        buildBattleSideReportSummary,
+        formatCompactNumber,
+        formatMoney,
+    } from "$lib/helpers";
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
@@ -19,6 +26,98 @@
 
     let isAttackerWinner = $derived(data.battle?.winnerSide === "attacker");
     let isDefenderWinner = $derived(data.battle?.winnerSide === "defender");
+    let sideReportSummary = $derived(
+        data.battle
+            ? buildBattleSideReportSummary(data.battle.damageReports)
+            : null,
+    );
+
+    // Easy future switch for smaller devices:
+    // set to true (or wire to viewport logic) to use 10-minute windows.
+    const USE_COMPACT_TIMELINE = false;
+    const DEFAULT_TIMELINE_WINDOW_MINUTES = 4;
+    const COMPACT_TIMELINE_WINDOW_MINUTES = 10;
+
+    let timelineWindowMinutes = $derived(
+        USE_COMPACT_TIMELINE
+            ? COMPACT_TIMELINE_WINDOW_MINUTES
+            : DEFAULT_TIMELINE_WINDOW_MINUTES,
+    );
+
+    type TimelineBucket = {
+        intervalStart: string;
+        attackerDamage: number;
+        defenderDamage: number;
+    };
+
+    function getBucketStartIso(iso: string, bucketMinutes: number): string {
+        const date = new Date(iso);
+        if (Number.isNaN(date.getTime())) {
+            return iso;
+        }
+
+        const ms = bucketMinutes * 60 * 1000;
+        const bucketStartMs = Math.floor(date.getTime() / ms) * ms;
+        return new Date(bucketStartMs).toISOString();
+    }
+
+    function buildBucketedTimeline(
+        points: Array<{
+            intervalStart: string;
+            attackerDamage: number;
+            defenderDamage: number;
+        }>,
+        bucketMinutes: number,
+    ): TimelineBucket[] {
+        const buckets = new Map<string, TimelineBucket>();
+
+        for (const point of points) {
+            const bucketStart = getBucketStartIso(
+                point.intervalStart,
+                bucketMinutes,
+            );
+            const bucket = buckets.get(bucketStart);
+
+            if (bucket) {
+                bucket.attackerDamage += point.attackerDamage;
+                bucket.defenderDamage += point.defenderDamage;
+                continue;
+            }
+
+            buckets.set(bucketStart, {
+                intervalStart: bucketStart,
+                attackerDamage: point.attackerDamage,
+                defenderDamage: point.defenderDamage,
+            });
+        }
+
+        return [...buckets.values()].sort((a, b) =>
+            a.intervalStart.localeCompare(b.intervalStart),
+        );
+    }
+
+    let bucketedTimeline = $derived(
+        sideReportSummary
+            ? buildBucketedTimeline(
+                  sideReportSummary.timeline,
+                  timelineWindowMinutes,
+              )
+            : [],
+    );
+
+    let bucketedMaxTimelineDamage = $derived(
+        bucketedTimeline.reduce((max, point) => {
+            return Math.max(max, point.attackerDamage, point.defenderDamage);
+        }, 0),
+    );
+
+    function timelineBarHeight(value: number, max: number): number {
+        if (value <= 0 || max <= 0) {
+            return 0;
+        }
+
+        return Math.max((value / max) * 100, 6);
+    }
 </script>
 
 {#if data.ok && data.battle}
@@ -116,111 +215,186 @@
     </div>
 {/if}
 
-<h1>Battle</h1>
+<div class="page-content">
+    <Wrapper>
+        {#if data.ok}
+            {#if data.battle}
+                <Card title="Damage Reports" headerBorder={false}>
+                    {#if data.battle.damageReports.length === 0}
+                        <p class="empty-state">No damage reports.</p>
+                    {:else}
+                        {#if sideReportSummary}
+                            <div class="battle-damage-viz">
+                                <div class="viz-header">
+                                    <div class="side-label attacker">
+                                        Attacker
+                                    </div>
+                                    <div class="center-label">
+                                        Damage Timeline ({timelineWindowMinutes}m)
+                                    </div>
+                                    <div class="side-label defender">
+                                        Defender
+                                    </div>
+                                </div>
 
-{#if data.ok}
-    {#if data.battle}
-        <section>
-            <h2>Overview</h2>
-            <ul>
-                <li>Status: {data.battle.isActive ? "Active" : "Ended"}</li>
-                {#if data.battle.endedAt}
-                    <li>Ended At: {data.battle.endedAt}</li>
-                {/if}
-                {#if data.battle.winnerSide}
-                    <li>Winner: {data.battle.winnerSide}</li>
-                {/if}
-                <li>
-                    Attacker: {data.battle.attackerCountry?.name ?? "Unknown"} ({data
-                        .battle.attackerCountry?.code ?? "?"})
-                    {#if data.battle.attackerAlliance}
-                        — {data.battle.attackerAlliance.name}
-                    {/if}
-                    — Damage: {data.battle.attackerDamages}
-                </li>
-                <li>
-                    Defender: {data.battle.defenderCountry?.name ?? "Unknown"} ({data
-                        .battle.defenderCountry?.code ?? "?"})
-                    {#if data.battle.defenderAlliance}
-                        — {data.battle.defenderAlliance.name}
-                    {/if}
-                    — Damage: {data.battle.defenderDamages}
-                </li>
-                {#if data.battle.defenderRegion}
-                    <li>
-                        Region: {data.battle.defenderRegion.name}
-                        (country: {data.battle.defenderRegion.country.code},
-                        initial: {data.battle.defenderRegion.initialCountry
-                            .code})
-                    </li>
-                {/if}
-            </ul>
-        </section>
+                                <div class="metric-values">
+                                    <span class="attacker"
+                                        >{formatCompactNumber(
+                                            sideReportSummary.damageTotals
+                                                .attacker,
+                                        )}</span
+                                    >
+                                    <span class="defender"
+                                        >{formatCompactNumber(
+                                            sideReportSummary.damageTotals
+                                                .defender,
+                                        )}</span
+                                    >
+                                </div>
 
-        <section>
-            <h2>Top Damage (Top 10)</h2>
-            {#if data.battle.topDamage.length === 0}
-                <p>No damage data.</p>
-            {:else}
-                <ol>
-                    {#each data.battle.topDamage as entry (entry.user.id)}
-                        <li>{entry.user.username} — {entry.totalDamage}</li>
-                    {/each}
-                </ol>
-            {/if}
-        </section>
-
-        <section>
-            <h2>Order Changes</h2>
-            {#if data.battle.orderChanges.length === 0}
-                <p>No order changes.</p>
-            {:else}
-                <ul>
-                    {#each data.battle.orderChanges as change (change.at + change.side + change.kind)}
-                        <li>
-                            {change.at} — {change.side}
-                            {change.action} ({change.kind}):
-                            {#if change.entity.__typename === "Country"}
-                                {change.entity.name} ({change.entity.code})
-                            {:else if change.entity.__typename === "Mu"}
-                                {change.entity.name}
-                            {/if}
-                        </li>
-                    {/each}
-                </ul>
-            {/if}
-        </section>
-
-        <section>
-            <h2>Damage Reports</h2>
-            {#if data.battle.damageReports.length === 0}
-                <p>No damage reports.</p>
-            {:else}
-                <ul>
-                    {#each data.battle.damageReports as report (report.intervalStart + report.side)}
-                        <li>
-                            {report.intervalStart} — {report.side}: {report.damage}
-                            {#if report.equipment.length > 0}
-                                <ul>
-                                    {#each report.equipment as eq (eq.itemCode)}
-                                        <li>
-                                            {eq.itemCode}: {eq.count} used (value:
-                                            {eq.value})
-                                        </li>
+                                <div class="compact-timeline">
+                                    {#each bucketedTimeline as point (point.intervalStart)}
+                                        <div
+                                            class="timeline-point"
+                                            title={`Attacker ${formatCompactNumber(point.attackerDamage)} vs Defender ${formatCompactNumber(point.defenderDamage)}`}
+                                        >
+                                            {#if point.attackerDamage >= point.defenderDamage}
+                                                <div
+                                                    class="bar attacker back"
+                                                    style={`height: ${timelineBarHeight(point.attackerDamage, bucketedMaxTimelineDamage)}%`}
+                                                ></div>
+                                                <div
+                                                    class="bar defender front"
+                                                    style={`height: ${timelineBarHeight(point.defenderDamage, bucketedMaxTimelineDamage)}%`}
+                                                ></div>
+                                            {:else}
+                                                <div
+                                                    class="bar defender back"
+                                                    style={`height: ${timelineBarHeight(point.defenderDamage, bucketedMaxTimelineDamage)}%`}
+                                                ></div>
+                                                <div
+                                                    class="bar attacker front"
+                                                    style={`height: ${timelineBarHeight(point.attackerDamage, bucketedMaxTimelineDamage)}%`}
+                                                ></div>
+                                            {/if}
+                                        </div>
                                     {/each}
-                                </ul>
-                            {/if}
-                        </li>
-                    {/each}
-                </ul>
+                                </div>
+
+                                <div class="equipment-totals">
+                                    <div class="total attacker">
+                                        <span class="label"
+                                            >Attacker equipment value</span
+                                        >
+                                        <span class="value"
+                                            >{formatMoney(
+                                                sideReportSummary
+                                                    .equipmentValueTotals
+                                                    .attacker,
+                                                0,
+                                            )}
+                                            btc</span
+                                        >
+                                    </div>
+                                    <div class="total defender">
+                                        <span class="label"
+                                            >Defender equipment value</span
+                                        >
+                                        <span class="value"
+                                            >{formatMoney(
+                                                sideReportSummary
+                                                    .equipmentValueTotals
+                                                    .defender,
+                                                0,
+                                            )}
+                                            btc</span
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="equipment-grid">
+                                    <div class="equipment-side attacker">
+                                        <h3>Attacker Equipment</h3>
+                                        {#if sideReportSummary.equipmentBySide.attacker.length === 0}
+                                            <p class="empty">
+                                                No equipment used.
+                                            </p>
+                                        {:else}
+                                            <ul>
+                                                {#each sideReportSummary.equipmentBySide.attacker as eq (eq.itemCode)}
+                                                    <li>
+                                                        <ItemImage
+                                                            itemCode={eq.itemCode}
+                                                            size={20}
+                                                        />
+                                                        <span class="item-name"
+                                                            >{eq.itemName}</span
+                                                        >
+                                                        <span class="item-count"
+                                                            >{eq.count}x</span
+                                                        >
+                                                        <span class="item-value"
+                                                            >{formatMoney(
+                                                                eq.value,
+                                                                0,
+                                                            )}
+                                                            btc</span
+                                                        >
+                                                    </li>
+                                                {/each}
+                                            </ul>
+                                        {/if}
+                                    </div>
+
+                                    <div class="equipment-side defender">
+                                        <h3>Defender Equipment</h3>
+                                        {#if sideReportSummary.equipmentBySide.defender.length === 0}
+                                            <p class="empty">
+                                                No equipment used.
+                                            </p>
+                                        {:else}
+                                            <ul>
+                                                {#each sideReportSummary.equipmentBySide.defender as eq (eq.itemCode)}
+                                                    <li>
+                                                        <ItemImage
+                                                            itemCode={eq.itemCode}
+                                                            size={20}
+                                                        />
+                                                        <span class="item-name"
+                                                            >{eq.itemName}</span
+                                                        >
+                                                        <span class="item-count"
+                                                            >{eq.count}x</span
+                                                        >
+                                                        <span class="item-value"
+                                                            >{formatMoney(
+                                                                eq.value,
+                                                                0,
+                                                            )}
+                                                            btc</span
+                                                        >
+                                                    </li>
+                                                {/each}
+                                            </ul>
+                                        {/if}
+                                    </div>
+                                </div>
+                            </div>
+                        {/if}
+                    {/if}
+                </Card>
+            {:else}
+                <Card title="Battle">
+                    <p class="empty-state">No battle data found.</p>
+                </Card>
             {/if}
-        </section>
-    {:else}
-        <p>No battle data found.</p>
-    {/if}
-{:else}
-    <p>GraphQL check failed: {data.error}</p>
-{/if}
+        {:else}
+            <Card title="Battle">
+                <p class="empty-state">GraphQL check failed: {data.error}</p>
+            </Card>
+        {/if}
+    </Wrapper>
+</div>
 
 <style lang="scss">
     div.battle-hero {
@@ -231,9 +405,20 @@
     }
 
     div.hero-content {
-        max-width: 1200px;
+        max-width: 1096px;
         margin: 0 auto;
         padding: 0 16px;
+    }
+
+    div.page-content {
+        margin: 0 8px;
+        margin-top: 24px;
+        margin-bottom: 24px;
+    }
+
+    p.empty-state {
+        margin: 0;
+        color: #8c909f;
     }
 
     div.battle-title {
@@ -379,6 +564,227 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         flex-shrink: 0;
+    }
+
+    div.battle-damage-viz {
+        margin: 0;
+        padding: 16px;
+        border: 1px solid #353535;
+        background: #1f1f1f;
+        border-radius: 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    div.viz-header {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+
+        .side-label {
+            font-weight: 700;
+
+            &.attacker {
+                color: #ffb4ab;
+                text-align: left;
+            }
+
+            &.defender {
+                color: #9dc4ff;
+                text-align: right;
+            }
+        }
+
+        .center-label {
+            color: #8c909f;
+            padding: 0 12px;
+            font-weight: 600;
+        }
+    }
+
+    div.metric-values {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: -0.2px;
+        padding: 0 2px;
+
+        .attacker {
+            color: #ffb4ab;
+        }
+
+        .defender {
+            color: #9dc4ff;
+        }
+    }
+
+    div.compact-timeline {
+        display: flex;
+        align-items: flex-end;
+        gap: 3px;
+        height: 86px;
+        border-radius: 4px;
+        background: #2b2b2b;
+        padding: 8px;
+        border: 1px solid #353535;
+    }
+
+    div.timeline-point {
+        flex: 1;
+        min-width: 0;
+        position: relative;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+    }
+
+    div.bar {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 0;
+        width: 100%;
+        border-radius: 2px 2px 0 0;
+    }
+
+    div.bar.back {
+        z-index: 1;
+        opacity: 0.78;
+    }
+
+    div.bar.front {
+        z-index: 2;
+        width: 70%;
+        border-left: 1px solid rgba(0, 0, 0, 0.25);
+        border-right: 1px solid rgba(0, 0, 0, 0.25);
+    }
+
+    div.bar.attacker {
+        background: #ff8475;
+    }
+
+    div.bar.defender {
+        background: #7ea9e8;
+    }
+
+    div.equipment-totals {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    div.total {
+        border: 1px solid #353535;
+        border-radius: 4px;
+        background: #242424;
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .label {
+            color: #8c909f;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .value {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+        }
+
+        &.attacker .value {
+            color: #ffb4ab;
+        }
+
+        &.defender .value {
+            color: #9dc4ff;
+        }
+    }
+
+    div.equipment-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    div.equipment-side {
+        border: 1px solid #353535;
+        border-radius: 4px;
+        background: #242424;
+        padding: 10px 12px;
+
+        h3 {
+            margin: 0 0 8px;
+            font-size: 12px;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: #c2c6d6;
+        }
+
+        p.empty {
+            margin: 8px 0;
+            color: #8c909f;
+            font-size: 12px;
+        }
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        li {
+            display: grid;
+            grid-template-columns: 20px 1fr auto auto;
+            align-items: center;
+            gap: 8px;
+            color: #c2c6d6;
+            font-size: 12px;
+        }
+
+        .item-name {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-count {
+            color: #8c909f;
+            font-weight: 600;
+        }
+
+        .item-value {
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+    }
+
+    @media (max-width: 900px) {
+        div.compact-timeline {
+            height: 72px;
+            gap: 2px;
+            padding: 6px;
+        }
+
+        div.equipment-totals,
+        div.equipment-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     @media (max-width: 600px) {

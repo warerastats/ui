@@ -4,11 +4,13 @@
     let {
         title,
         class: className = "",
+        headerBorder = true,
         children,
         header,
     }: {
         title?: string;
         class?: string;
+        headerBorder?: boolean;
         children: Snippet;
         header?: Snippet;
     } = $props();
@@ -16,7 +18,7 @@
 
 <div class="card {className}">
     {#if title || header}
-        <div class="header">
+        <div class="header" class:no-border={!headerBorder}>
             {#if header}
                 {@render header()}
             {:else}
@@ -44,6 +46,10 @@
 
         &:has(.title) {
             border-bottom: #353535 1px solid;
+        }
+
+        &.no-border {
+            border-bottom: none;
         }
     }
 
