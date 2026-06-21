@@ -3,14 +3,14 @@
 
     let {
         title,
-        class: className = '',
+        class: className = "",
         children,
-        header
+        header,
     }: {
-        title?: string,
-        class?: string,
-        children: Snippet,
-        header?: Snippet
+        title?: string;
+        class?: string;
+        children: Snippet;
+        header?: Snippet;
     } = $props();
 </script>
 

@@ -3,20 +3,19 @@
         src: inputSrc,
         alt,
         width,
-        height
+        height,
     }: {
-        src?: string | undefined,
-        alt: string,
-        width?: string | undefined,
-        height?: string | undefined
+        src?: string | undefined;
+        alt: string;
+        width?: string | undefined;
+        height?: string | undefined;
     } = $props();
 
     let src = $derived(
-        typeof inputSrc !== "undefined" &&
-        inputSrc !== "" ?
-        inputSrc :
-        "/placeholder3.png"
-    )
+        typeof inputSrc !== "undefined" && inputSrc !== ""
+            ? inputSrc
+            : "/placeholder3.png",
+    );
 </script>
 
-<img src={src} {alt} height={height ?? "32px"} width={width ?? "32px"} />
+<img {src} {alt} height={height ?? "32px"} width={width ?? "32px"} />

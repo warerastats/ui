@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { InflationPoint } from "$lib";
-    import Card from "./Card.svelte";
 
     let { points }: { points: InflationPoint[] } = $props();
 
@@ -31,58 +30,36 @@
     }
 </script>
 
-<Card>
-    {#snippet header()}
-        <div class="chart-header">
-            <div class="label">Inflation (daily % change)</div>
-        </div>
-    {/snippet}
-
-    <div class="bar-chart">
-        {#each points as point, i (point.dayStart)}
-            <div class="bar-col" data-pct={fmtPct(point.pctChange24h)}>
-                <div class="bar-top">
-                    {#if point.pctChange24h > 0}
-                        <div
-                            class="bar-fill up"
-                            style="height: {barPct(point.pctChange24h)}%"
-                        ></div>
-                    {/if}
-                </div>
-                <div class="bar-bottom">
-                    {#if point.pctChange24h < 0}
-                        <div
-                            class="bar-fill down"
-                            style="height: {barPct(point.pctChange24h)}%"
-                        ></div>
-                    {/if}
-                </div>
-                <span
-                    class="bar-date"
-                    class:hidden={i % dateStep !== 0 &&
-                        i !== points.length - 1}
-                >
-                    {shortDate(point.dayStart)}
-                </span>
+<div class="bar-chart">
+    {#each points as point, i (point.dayStart)}
+        <div class="bar-col" data-pct={fmtPct(point.pctChange24h)}>
+            <div class="bar-top">
+                {#if point.pctChange24h > 0}
+                    <div
+                        class="bar-fill up"
+                        style="height: {barPct(point.pctChange24h)}%"
+                    ></div>
+                {/if}
             </div>
-        {/each}
-    </div>
-</Card>
+            <div class="bar-bottom">
+                {#if point.pctChange24h < 0}
+                    <div
+                        class="bar-fill down"
+                        style="height: {barPct(point.pctChange24h)}%"
+                    ></div>
+                {/if}
+            </div>
+            <span
+                class="bar-date"
+                class:hidden={i % dateStep !== 0 && i !== points.length - 1}
+            >
+                {shortDate(point.dayStart)}
+            </span>
+        </div>
+    {/each}
+</div>
 
 <style lang="scss">
-    .chart-header {
-        display: flex;
-        justify-content: space-between;
-
-        .label {
-            color: #c2c6d6;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            font-weight: 600;
-        }
-    }
-
     .bar-chart {
         display: flex;
         align-items: stretch;

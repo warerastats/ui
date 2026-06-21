@@ -41,7 +41,7 @@ type AllianceBattleParticipation {
 }
 
 type AllianceMoneyFlowCounterpart {
-  alliance: Alliance!
+  alliance: Alliance
   inEquipment: Float!
   inItems: Float!
   inWages: Float!
@@ -51,7 +51,7 @@ type AllianceMoneyFlowCounterpart {
 }
 
 type AllianceMoneyFlowReport {
-  alliance: Alliance!
+  alliance: Alliance
   counterparts: [AllianceMoneyFlowCounterpart!]!
   dayStart: DateTime!
   id: ID!
@@ -97,7 +97,7 @@ type Battle {
 }
 
 type BattleDamageReport {
-  battle: Battle!
+  battle: Battle
   damage: Int64!
   damagePct: Float!
   entity: Entity
@@ -116,7 +116,7 @@ enum BattleFilter {
 type BattleOrderChange {
   action: String!
   at: DateTime!
-  battle: Battle!
+  battle: Battle
   entity: Entity
   id: ID!
   kind: String!
@@ -134,7 +134,7 @@ type CaseTransaction {
   case: String!
   id: ID!
   item: Item
-  user: User!
+  user: User
 }
 
 type CasesReport {
@@ -159,16 +159,16 @@ type Company {
 
 type CompanyItemCodeChange {
   at: DateTime!
-  company: Company!
+  company: Company
   id: ID!
   itemCode: String!
 }
 
 type CompanyRegionChange {
   at: DateTime!
-  company: Company!
+  company: Company
   id: ID!
-  region: Region!
+  region: Region
 }
 
 type Country {
@@ -200,21 +200,21 @@ type Country {
 }
 
 type CountryAllianceJoin {
-  alliance: Alliance!
+  alliance: Alliance
   at: DateTime!
-  country: Country!
+  country: Country
   id: ID!
 }
 
 type CountryAllianceLeave {
   at: DateTime!
-  country: Country!
+  country: Country
   id: ID!
   prevAlliance: Alliance
 }
 
 type CountryAllianceMoneyFlowCounterpart {
-  alliance: Alliance!
+  alliance: Alliance
   inEquipment: Float!
   inItems: Float!
   inWages: Float!
@@ -225,7 +225,7 @@ type CountryAllianceMoneyFlowCounterpart {
 
 type CountryAllianceMoneyFlowReport {
   counterparts: [CountryAllianceMoneyFlowCounterpart!]!
-  country: Country!
+  country: Country
   dayStart: DateTime!
   id: ID!
   inEquipment: Float!
@@ -251,7 +251,7 @@ type CountryAllianceMoneyFlowReport {
 type CountryFlipEvent {
   at: DateTime!
   buyCost: Float!
-  country: Country!
+  country: Country
   id: ID!
   itemCode: String!
   profit: Float!
@@ -260,7 +260,7 @@ type CountryFlipEvent {
 }
 
 type CountryFlipState {
-  country: Country!
+  country: Country
   profitable: Int!
   totalProfit: Float!
   totalTrades: Int!
@@ -268,13 +268,13 @@ type CountryFlipState {
 }
 
 type CountryInventory {
-  country: Country!
+  country: Country
   lots: [InventoryLotGroup!]!
   updatedAt: DateTime!
 }
 
 type CountryMoneyFlowCounterpart {
-  country: Country!
+  country: Country
   inEquipment: Float!
   inItems: Float!
   inWages: Float!
@@ -285,7 +285,7 @@ type CountryMoneyFlowCounterpart {
 
 type CountryMoneyFlowReport {
   counterparts: [CountryMoneyFlowCounterpart!]!
-  country: Country!
+  country: Country
   dayStart: DateTime!
   id: ID!
   inEquipment: Float!
@@ -310,21 +310,21 @@ type CountryMoneyFlowReport {
 
 type CountryRulingPartyChange {
   at: DateTime!
-  country: Country!
+  country: Country
   id: ID!
   party: Party
 }
 
 type CountrySpecialisationChange {
   at: DateTime!
-  country: Country!
+  country: Country
   id: ID!
   itemCode: String
 }
 
 type CountryTaxFlow {
   coreEarned: Float!
-  country: Country!
+  country: Country
   foreignTaxIn: Float!
   foreignTaxOut: Float!
   foreignTaxRecipients: [ForeignTaxRecipient!]!
@@ -342,7 +342,7 @@ type CraftTransaction {
   id: ID!
   item: Item
   scrapsCost: Int!
-  user: User!
+  user: User
 }
 
 type Damage {
@@ -370,7 +370,7 @@ type Damage {
 type DamageRanking {
   battleCount: Int!
   totalDamage: Int64!
-  user: User!
+  user: User
 }
 
 scalar DateTime
@@ -386,7 +386,7 @@ type DismantleTransaction {
   id: ID!
   item: Item
   scrapsReceived: Int!
-  user: User!
+  user: User
 }
 
 type EffectivePrice {
@@ -408,9 +408,9 @@ type Employee {
 
 type EmployeeWageChange {
   at: DateTime!
-  company: Company!
+  company: Company
   id: ID!
-  user: User!
+  user: User
   wage: Float!
 }
 
@@ -573,7 +573,7 @@ enum ItemStatus {
 type LootTransaction {
   id: ID!
   item: Item
-  user: User!
+  user: User
 }
 
 type MarketState {
@@ -587,11 +587,11 @@ type MarketState {
 }
 
 type MarketTransaction {
-  buyer: User!
+  buyer: User
   id: ID!
   item: Item
   money: Float!
-  seller: User!
+  seller: User
 }
 
 type Mu {
@@ -614,7 +614,7 @@ type Mu {
 }
 
 type MuAllianceMoneyFlowCounterpart {
-  alliance: Alliance!
+  alliance: Alliance
   inEquipment: Float!
   inItems: Float!
   inWages: Float!
@@ -636,7 +636,7 @@ type MuAllianceMoneyFlowReport {
   inWages: Float!
   inWagesInsideMuAlliance: Float!
   inWagesOutsideMuAlliance: Float!
-  mu: Mu!
+  mu: Mu
   outEquipment: Float!
   outEquipmentInsideMuAlliance: Float!
   outEquipmentOutsideMuAlliance: Float!
@@ -649,7 +649,7 @@ type MuAllianceMoneyFlowReport {
 }
 
 type MuCountryMoneyFlowCounterpart {
-  country: Country!
+  country: Country
   inEquipment: Float!
   inItems: Float!
   inWages: Float!
@@ -674,7 +674,7 @@ type MuCountryMoneyFlowReport {
   inWagesCrossBorderOutsideMuCountry: Float!
   inWagesInsideMu: Float!
   inWagesSameCountryOutsideMu: Float!
-  mu: Mu!
+  mu: Mu
   outEquipment: Float!
   outEquipmentCrossBorderOutsideMuCountry: Float!
   outEquipmentInsideMu: Float!
@@ -693,21 +693,21 @@ type MuMercenaryReputationChange {
   at: DateTime!
   id: ID!
   mercRep: Float!
-  mu: Mu!
+  mu: Mu
 }
 
 type MuNameChange {
   at: DateTime!
   id: ID!
-  mu: Mu!
+  mu: Mu
   name: String!
 }
 
 type MuOwnerChange {
   at: DateTime!
   id: ID!
-  mu: Mu!
-  owner: User!
+  mu: Mu
+  owner: User
 }
 
 type OrderBook {
@@ -758,25 +758,25 @@ type PartyDescriptionChange {
   at: DateTime!
   description: String!
   id: ID!
-  party: Party!
+  party: Party
 }
 
 type PartyEthicsChange {
   at: DateTime!
   ethics: Ethics!
   id: ID!
-  party: Party!
+  party: Party
 }
 
 type PartyLeaderChange {
   at: DateTime!
   id: ID!
-  leader: User!
-  party: Party!
+  leader: User
+  party: Party
 }
 
 type PartyMoneyFlowCounterpart {
-  country: Country!
+  country: Country
   inEquipment: Float!
   inItems: Float!
   inWages: Float!
@@ -819,14 +819,14 @@ type PartyMoneyFlowReport {
   outWagesOutsideAlliance: Float!
   outWagesSameAllianceCrossBorder: Float!
   outWagesSameCountryOutsideParty: Float!
-  party: Party!
+  party: Party
 }
 
 type PartyNameChange {
   at: DateTime!
   id: ID!
   name: String!
-  party: Party!
+  party: Party
 }
 
 type Query {
@@ -893,22 +893,22 @@ type RegionDeposit {
   bonusPercent: Float
   endsAt: DateTime
   id: ID!
-  region: Region!
+  region: Region
   startsAt: DateTime
   type: String
 }
 
 type RegionOwnerChange {
   at: DateTime!
-  country: Country!
+  country: Country
   id: ID!
-  region: Region!
+  region: Region
 }
 
 type RegionStrategicResource {
   at: DateTime!
   id: ID!
-  region: Region!
+  region: Region
   resource: String
 }
 
@@ -982,14 +982,14 @@ enum TradeSide {
 }
 
 type TradeTransaction {
-  buyer: User!
+  buyer: User
   buyerCountry: Country
   buyerMu: Mu
   id: ID!
   itemCode: String!
   money: Float!
   quantity: Int!
-  seller: User!
+  seller: User
   sellerCountry: Country
   sellerMu: Mu
   timeTillSale: Int64!
@@ -1042,21 +1042,21 @@ type UserBattleParticipation {
   ownCountryParticipated: Int!
   totalDamage: Int64!
   updatedAt: DateTime!
-  user: User!
+  user: User
 }
 
 type UserCompanyChange {
   at: DateTime!
   company: Company
   id: ID!
-  user: User!
+  user: User
 }
 
 type UserCountryChange {
   at: DateTime!
   country: Country
   id: ID!
-  user: User!
+  user: User
 }
 
 type UserFinanceReport {
@@ -1068,7 +1068,7 @@ type UserFinanceReport {
   id: ID!
   itemsBought: Float!
   itemsSold: Float!
-  user: User!
+  user: User
   valueDismantled: Float!
   wagesEarned: Float!
   wagesPaid: Float!
@@ -1083,7 +1083,7 @@ type UserFlipEvent {
   profit: Float!
   quantity: Int!
   sellRevenue: Float!
-  user: User!
+  user: User
 }
 
 type UserFlipState {
@@ -1091,26 +1091,26 @@ type UserFlipState {
   totalFlips: Int!
   totalProfit: Float!
   updatedAt: DateTime!
-  user: User!
+  user: User
 }
 
 type UserInventory {
   items: [IntEntry!]!
   updatedAt: DateTime!
-  user: User!
+  user: User
 }
 
 type UserMuChange {
   at: DateTime!
   id: ID!
   mu: Mu
-  user: User!
+  user: User
 }
 
 type UserNameChange {
   at: DateTime!
   id: ID!
-  user: User!
+  user: User
   username: String!
 }
 
@@ -1118,14 +1118,14 @@ type UserPartyChange {
   at: DateTime!
   id: ID!
   party: Party
-  user: User!
+  user: User
 }
 
 type UserSkillChange {
   at: DateTime!
   id: ID!
   skills: [IntEntry!]!
-  user: User!
+  user: User
 }
 
 type WageCandle {
@@ -1153,18 +1153,18 @@ type WageMarketState {
 
 type WagePaidUser {
   totalPaid: Float!
-  user: User!
+  user: User
 }
 
 type WageRanking {
   count: Int!
   total: Float!
-  user: User!
+  user: User
 }
 
 type WageTransaction {
-  employee: User!
-  employer: User!
+  employee: User
+  employer: User
   id: ID!
   money: Float!
   productionPoints: Int!

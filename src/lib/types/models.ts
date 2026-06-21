@@ -1,15 +1,19 @@
 export type CountrySummary = {
     id: string;
     name: string;
+    code: string;
 };
 
 export type BattleSummary = {
     id: string;
     winnerSide: string | null;
-    attackerCountry: CountrySummary | null;
+    attackerCountry: CountrySummary;
     attackerDamages: number;
-    defenderCountry: CountrySummary | null;
+    defenderCountry: CountrySummary;
     defenderDamages: number;
+    defenderRegion: {
+        name: string;
+    };
 };
 
 export type BattleCountry = {

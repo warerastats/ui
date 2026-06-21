@@ -1,7 +1,5 @@
 <div class="header">
-    <p>
-        War Era Stats
-    </p>
+    <p>War Era Stats</p>
 </div>
 
 <style lang="scss">

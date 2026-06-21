@@ -77,15 +77,18 @@
         <SearchIcon color="#8C909F" />
 
         <!-- svelte-ignore a11y_autofocus -->
-        <input type="text" bind:value={searchTerm} placeholder="Search players, countries, items..." autofocus>
+        <input
+            type="text"
+            bind:value={searchTerm}
+            placeholder="Search players, countries, items..."
+            autofocus
+        />
     </div>
 
     {#if searchResults.length > 0 || searchError !== null || isSearching}
         <div class="results">
             {#if isSearching}
-                <p>
-                    Searching...
-                </p>
+                <p>Searching...</p>
             {/if}
 
             {#if searchError !== null}
@@ -99,7 +102,12 @@
                     {#if item.__typename === "User"}
                         <a href={`/user/${item.id}`}>
                             <div class="result-row">
-                                <UserAvatar src={item.avatarUrl} alt={item.username+"'s avatar"} height="48px" width="48px"/>
+                                <UserAvatar
+                                    src={item.avatarUrl}
+                                    alt={item.username + "'s avatar"}
+                                    height="48px"
+                                    width="48px"
+                                />
                                 <div class="result-copy">
                                     <span>{item.username}</span>
                                     <span class="result-type">user</span>
@@ -109,7 +117,11 @@
                     {:else if item.__typename === "Country"}
                         <a href={`/country/${item.id}`}>
                             <div class="result-row">
-                                <CountryFlag code={item.code} height="48px" width="48px"/>
+                                <CountryFlag
+                                    code={item.code}
+                                    height="48px"
+                                    width="48px"
+                                />
                                 <div class="result-copy">
                                     <span>{item.name}</span>
                                     <span class="result-type">country</span>
@@ -119,7 +131,12 @@
                     {:else if item.__typename === "Mu"}
                         <a href={`/mu/${item.id}`}>
                             <div class="result-row">
-                                <UserAvatar src={item.avatarUrl} alt={item.name+"'s avatar"} height="48px" width="48px"/>
+                                <UserAvatar
+                                    src={item.avatarUrl}
+                                    alt={item.name + "'s avatar"}
+                                    height="48px"
+                                    width="48px"
+                                />
                                 <div class="result-copy">
                                     <span>{item.name}</span>
                                     <span class="result-type">mu</span>
@@ -129,7 +146,12 @@
                     {:else if item.__typename === "Party"}
                         <a href={`/party/${item.id}`}>
                             <div class="result-row">
-                                <UserAvatar src={item.avatarUrl} alt={item.name+"'s avatar"} height="48px" width="48px"/>
+                                <UserAvatar
+                                    src={item.avatarUrl}
+                                    alt={item.name + "'s avatar"}
+                                    height="48px"
+                                    width="48px"
+                                />
                                 <div class="result-copy">
                                     <span>{item.name}</span>
                                     <span class="result-type">party</span>

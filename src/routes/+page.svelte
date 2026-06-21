@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { SearchApiResponse, SearchResultItem } from "$lib";
+    import Battle from "$lib/components/Battle.svelte";
     import Card from "$lib/components/Card.svelte";
     import InflationChart from "$lib/components/InflationChart.svelte";
     import Search from "$lib/components/Search.svelte";
@@ -83,76 +84,118 @@
 </div>
 
 {#if data.ok}
-
     {#if data.latestMarketState}
         <div style="margin: 0 8px; margin-top: 48px;">
             <Wrapper>
                 <div class="cards-3">
-                    <Card>
-                        {#snippet header()}
-                            <div class="stat-header">
-                                <div class="left">
-                                    Avg wage (24h)
+                    <div style="flex: 1">
+                        <Card>
+                            {#snippet header()}
+                                <div class="card-header">
+                                    <div class="label">Avg wage (24h)</div>
                                 </div>
-                            </div>
-                        {/snippet}
+                            {/snippet}
 
-                        <p class="stat">
-                            <span class="big">
-                                {formatMoney(data.latestMarketState.avgWage24h)}
-                            </span>
-                            btc
-                        </p>
-                    </Card>
-
-                    <Card>
-                        {#snippet header()}
-                            <div class="stat-header">
-                                <div class="left">
-                                    Total wages (24h)
+                            <p class="stat">
+                                <span class="big">
+                                    {formatMoney(
+                                        data.latestMarketState.avgWage24h,
+                                    )}
+                                </span>
+                                btc
+                            </p>
+                        </Card>
+                    </div>
+                    <div style="flex: 1">
+                        <Card>
+                            {#snippet header()}
+                                <div class="card-header">
+                                    <div class="label">Total wages (24h)</div>
                                 </div>
-                            </div>
-                        {/snippet}
+                            {/snippet}
 
-                        <p class="stat">
-                            <span class="big">
-                                {formatMoney(data.latestMarketState.wageVolume24h, 0)}
-                            </span>
-                            btc
-                        </p>
-                    </Card>
+                            <p class="stat">
+                                <span class="big">
+                                    {formatMoney(
+                                        data.latestMarketState.wageVolume24h,
+                                        0,
+                                    )}
+                                </span>
+                                btc
+                            </p>
+                        </Card>
+                    </div>
 
-                    <Card>
-                        {#snippet header()}
-                            <div class="stat-header">
-                                <div class="left">
-                                    Trade volume (24h)
+                    <div style="flex: 1">
+                        <Card>
+                            {#snippet header()}
+                                <div class="card-header">
+                                    <div class="label">Trade volume (24h)</div>
                                 </div>
-                            </div>
-                        {/snippet}
+                            {/snippet}
 
-                        <p class="stat">
-                            <span class="big">
-                                {formatMoney(data.latestMarketState.marketVolume24h, 0)}
-                            </span>
-                            btc
-                        </p>
-                    </Card>
+                            <p class="stat">
+                                <span class="big">
+                                    {formatMoney(
+                                        data.latestMarketState.marketVolume24h,
+                                        0,
+                                    )}
+                                </span>
+                                btc
+                            </p>
+                        </Card>
+                    </div>
                 </div>
             </Wrapper>
         </div>
     {/if}
 
-    {#if data.inflation.length > 0}
+    {#if data.inflation || data.battles}
         <div style="margin: 0 8px; margin-top: 24px;">
             <Wrapper>
-                <div class="inflation-row">
-                    <InflationChart points={data.inflation} />
+                <div class="row">
+                    {#if data.inflation}
+                        <div class="inflation-row">
+                            <Card>
+                                {#snippet header()}
+                                    <div class="card-header">
+                                        <div class="label">
+                                            Inflation (daily % change)
+                                        </div>
+                                    </div>
+                                {/snippet}
+
+                                {#if data.inflation.length > 0}
+                                    <InflationChart points={data.inflation} />
+                                {:else}
+                                    There's currently no inflation data
+                                    available.
+                                {/if}
+                            </Card>
+                        </div>
+                    {/if}
+
+                    {#if data.battles}
+                        <div class="battles">
+                            <Card>
+                                {#snippet header()}
+                                    <div class="card-header">
+                                        <div class="label">
+                                            Recent completed battles
+                                        </div>
+                                    </div>
+                                {/snippet}
+
+                                {#each data.battles as battle}
+                                    <Battle {battle} />
+                                {/each}
+                            </Card>
+                        </div>
+                    {/if}
                 </div>
             </Wrapper>
         </div>
     {/if}
-
 {/if}
 
 <h1>WareraStats UI</h1>
@@ -193,71 +236,6 @@
     {/if}
 </section>
 
-{#if data.ok}
-    <section>
-        <h2>Latest Market State</h2>
-        {#if data.latestMarketState}
-            <ul>
-                <li>Avg wage (24h): {data.latestMarketState.avgWage24h}</li>
-                <li>
-                    Wage volume (24h): {data.latestMarketState.wageVolume24h}
-                </li>
-                <li>
-                    Market volume (24h): {data.latestMarketState
-                        .marketVolume24h}
-                </li>
-                <li>Wage min: {data.latestMarketState.wageMin}</li>
-                <li>Wage max: {data.latestMarketState.wageMax}</li>
-                <li>
-                    Weighted avg wage: {data.latestMarketState.wageAvgWeighted}
-                </li>
-            </ul>
-        {:else}
-            <p>No market state available.</p>
-        {/if}
-    </section>
-
-    <section>
-        <h2>Inflation (Last 30 Full UTC Days)</h2>
-        {#if data.inflation.length === 0}
-            <p>No inflation points available for the selected window.</p>
-        {:else}
-            <ul>
-                {#each data.inflation as point (point.dayStart)}
-                    <li>
-                        <p>Day start: {point.dayStart}</p>
-                        <p>24h change: {point.pctChange24h}%</p>
-                    </li>
-                {/each}
-            </ul>
-        {/if}
-    </section>
-
-    <section>
-        <h2>Finalized Battles (Latest 5)</h2>
-        {#if data.battles.length === 0}
-            <p>No finalized battles found.</p>
-        {:else}
-            <ul>
-                {#each data.battles as battle (battle.id)}
-                    <li>
-                        <p>ID: {battle.id}</p>
-                        <p>Winner side: {battle.winnerSide ?? "Unknown"}</p>
-                        <p>
-                            {battle.attackerCountry?.name ?? "Unknown attacker"}
-                            ({battle.attackerDamages}) vs
-                            {battle.defenderCountry?.name ?? "Unknown defender"}
-                            ({battle.defenderDamages})
-                        </p>
-                    </li>
-                {/each}
-            </ul>
-        {/if}
-    </section>
-{:else}
-    <p>GraphQL check failed: {data.error}</p>
-{/if}
-
 <style lang="scss">
     div.cards-3 {
         display: flex;
@@ -269,12 +247,12 @@
         width: calc((100% - 48px) * 2 / 3 + 24px);
     }
 
-    .stat-header {
+    .card-header {
         display: flex;
         justify-content: space-between;
 
-        .left {
-            color: #C2C6D6;
+        .label {
+            color: #c2c6d6;
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 1.2px;
@@ -284,7 +262,7 @@
 
     p.stat {
         margin: 0;
-        color: #8C909F;
+        color: #8c909f;
         font-weight: 800;
         font-size: 12px;
         text-transform: uppercase;
@@ -295,5 +273,14 @@
             letter-spacing: -1.5px;
             padding-right: 2px;
         }
+    }
+
+    div.row {
+        display: flex;
+        gap: 24px;
+    }
+
+    div.battles {
+        flex: 1;
     }
 </style>

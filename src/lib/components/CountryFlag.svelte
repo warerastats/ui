@@ -5,7 +5,12 @@
         import: "default",
     }) as Record<string, string>;
 
-    let { code, height = "24px", width = "auto", alt = "" }: {
+    let {
+        code,
+        height = "24px",
+        width = "auto",
+        alt = "",
+    }: {
         code: string;
         height?: string;
         width?: string;

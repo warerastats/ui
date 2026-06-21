@@ -18,13 +18,18 @@ const INDEX_QUERY = `
             attackerCountry {
                 id
                 name
+                code
             }
             attackerDamages
             defenderCountry {
                 id
                 name
+                code
             }
             defenderDamages
+            defenderRegion {
+              name
+            }
         }
         inflation(
             from: $from
