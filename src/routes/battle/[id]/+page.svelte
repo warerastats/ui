@@ -324,6 +324,13 @@
             .slice(0, limit);
     }
 
+    function getTopDamageTotalCost(summary: BattleSideReportSummary): number {
+        return (
+            summary.equipmentValueTotals.attacker +
+            summary.equipmentValueTotals.defender
+        );
+    }
+
     function getOrderChangeSide(
         value: string,
     ): "attacker" | "defender" | "other" {
@@ -974,6 +981,16 @@
                                                                 .defender,
                                                         )}</span
                                                     >
+                                                    <span
+                                                        class="top-damage-cost"
+                                                        >Cost {formatMoney(
+                                                            getTopDamageTotalCost(
+                                                                detail.summary,
+                                                            ),
+                                                            0,
+                                                        )}
+                                                        btc</span
+                                                    >
                                                 {/if}
                                             </div>
 
@@ -1193,6 +1210,17 @@
             color: #9dc4ff;
             border-color: rgba(126, 169, 232, 0.5);
         }
+    }
+
+    span.top-damage-cost {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 3px;
+        border: 1px solid rgba(74, 240, 192, 0.45);
+        background: rgba(74, 240, 192, 0.1);
+        color: #4af0c0;
+        letter-spacing: -0.1px;
     }
 
     span.top-damage-loading,
