@@ -5,6 +5,7 @@
     import ItemImage from "$lib/components/ItemImage.svelte";
     import ItemOrderBook from "$lib/components/ItemOrderBook.svelte";
     import ItemPriceHistoryChart from "$lib/components/ItemPriceHistoryChart.svelte";
+    import ItemTransactionsFeed from "$lib/components/ItemTransactionsFeed.svelte";
     import Wrapper from "$lib/components/Wrapper.svelte";
     import {
         formatCompactNumber,
@@ -102,6 +103,10 @@
                     </p>
                 {/if}
             </Card>
+
+            <Card title="Transactions" class="transactions-card">
+                <ItemTransactionsFeed transactions={data.transactions} />
+            </Card>
         {:else}
             <Card title="Item">
                 <p class="empty-state">GraphQL check failed: {data.error}</p>
@@ -193,6 +198,14 @@
     }
 
     :global(div.effective-card > div.body) {
+        padding-top: 12px;
+    }
+
+    :global(div.transactions-card) {
+        margin-top: 12px;
+    }
+
+    :global(div.transactions-card > div.body) {
         padding-top: 12px;
     }
 

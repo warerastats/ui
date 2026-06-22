@@ -89,32 +89,34 @@
             {#each effectivePairs as pair (`eff-${pair.size}`)}
                 <div class="effective-row" role="listitem">
                     <div class="row-meta">
-                        <span class="size"
-                            >Size {formatCompactNumber(pair.size)}</span
-                        >
-
-                        <span class="side sell">
-                            Sell
-                            <span class="money-inline">
-                                <Coin width="11px" height="11px" />
-                                {formatMoney(pair.sellAvg, 4)}
-                            </span>
-                        </span>
-
-                        <span class="side buy">
+                        <div class="side-card buy">
+                            <span class="side-label">Buy</span>
                             Buy
                             <span class="money-inline">
                                 <Coin width="11px" height="11px" />
                                 {formatMoney(pair.buyAvg, 4)}
                             </span>
-                        </span>
+                        </div>
+
+                        <span class="size"
+                            >Size {formatCompactNumber(pair.size)}</span
+                        >
+
+                        <div class="side-card sell">
+                            <span class="side-label">Sell</span>
+                            Sell
+                            <span class="money-inline">
+                                <Coin width="11px" height="11px" />
+                                {formatMoney(pair.sellAvg, 4)}
+                            </span>
+                        </div>
                     </div>
 
                     <div class="bar-row">
                         <div class="half left">
                             <div
-                                class="fill sell"
-                                style={`width:${pair.sellWidthPct}%`}
+                                class="fill buy"
+                                style={`width:${pair.buyWidthPct}%`}
                             ></div>
                         </div>
 
@@ -136,8 +138,8 @@
 
                         <div class="half right">
                             <div
-                                class="fill buy"
-                                style={`width:${pair.buyWidthPct}%`}
+                                class="fill sell"
+                                style={`width:${pair.sellWidthPct}%`}
                             ></div>
                         </div>
                     </div>
@@ -179,41 +181,55 @@
 
     div.row-meta {
         display: grid;
-        grid-template-columns: auto 1fr 1fr;
+        grid-template-columns: 1fr auto 1fr;
         align-items: center;
         gap: 10px;
     }
 
     span.size {
-        font-size: 11px;
+        font-size: 12px;
         font-weight: 700;
         color: #8c909f;
         text-transform: uppercase;
         letter-spacing: 0.4px;
+        justify-self: center;
+        border: 1px solid #353535;
+        background: #171717;
+        border-radius: 6px;
+        padding: 5px 8px;
     }
 
-    span.side {
+    div.side-card {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        font-size: 11px;
-        color: #8c909f;
-        font-weight: 600;
+        gap: 8px;
+        font-size: 14px;
+        color: #c2c6d6;
+        font-weight: 700;
         font-variant-numeric: tabular-nums;
+        padding: 2px 0;
 
-        &.sell {
-            justify-self: start;
-
-            span.money-inline {
-                color: #4af0c0;
-            }
+        span.side-label {
+            color: #8c909f;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 700;
         }
 
         &.buy {
-            justify-self: end;
+            justify-self: start;
 
             span.money-inline {
                 color: #ffb4ab;
+            }
+        }
+
+        &.sell {
+            justify-self: end;
+
+            span.money-inline {
+                color: #4af0c0;
             }
         }
     }
@@ -247,22 +263,22 @@
         height: 100%;
         transition: width 0.2s ease;
 
-        &.sell {
-            background: linear-gradient(
-                to left,
-                rgba(74, 240, 192, 0.42),
-                rgba(74, 240, 192, 0.12)
-            );
-            border-right: 2px solid rgba(74, 240, 192, 0.9);
-        }
-
         &.buy {
             background: linear-gradient(
-                to right,
+                to left,
                 rgba(255, 122, 122, 0.42),
                 rgba(255, 122, 122, 0.12)
             );
-            border-left: 2px solid rgba(255, 122, 122, 0.9);
+            border-right: 2px solid rgba(255, 122, 122, 0.9);
+        }
+
+        &.sell {
+            background: linear-gradient(
+                to right,
+                rgba(74, 240, 192, 0.42),
+                rgba(74, 240, 192, 0.12)
+            );
+            border-left: 2px solid rgba(74, 240, 192, 0.9);
         }
     }
 
@@ -312,7 +328,7 @@
             gap: 4px;
         }
 
-        span.side {
+        div.side-card {
             justify-self: start !important;
         }
 
