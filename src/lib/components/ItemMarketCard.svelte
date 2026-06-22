@@ -64,7 +64,7 @@
     </div>
 
     <div class="item-header">
-        <ItemImage itemCode={item.itemCode} size={22} />
+        <ItemImage itemCode={item.itemCode} size={32} />
         <div class="title-wrap">
             <h2>{getItemName(item.itemCode)}</h2>
             <p class="code">{item.itemCode}</p>
@@ -83,11 +83,11 @@
             <div class="metric">
                 <span class="label">Price</span>
                 <span class="value">
-                    {formatMoney(item.report.avgWeighted24h, 2)}
+                    {formatMoney(item.report.avgWeighted24h, 3)}
                 </span>
             </div>
             <div class="metric">
-                <span class="label">Pct Changed</span>
+                <span class="label">Change</span>
                 <span
                     class="value pct"
                     class:positive={item.report.pctChange24h >= 0}
@@ -139,7 +139,7 @@
     div.item-header {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
         position: relative;
         z-index: 1;
     }
@@ -150,7 +150,7 @@
         h2 {
             margin: 0;
             color: #c2c6d6;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 700;
             line-height: 1.2;
             white-space: nowrap;
@@ -161,7 +161,7 @@
         p.code {
             margin: 0;
             color: #8c909f;
-            font-size: 11px;
+            font-size: 12px;
         }
     }
 
