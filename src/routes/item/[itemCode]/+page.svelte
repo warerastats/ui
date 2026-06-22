@@ -1,6 +1,7 @@
 <script lang="ts">
     import Card from "$lib/components/Card.svelte";
     import Coin from "$lib/components/Coin.svelte";
+    import ItemEffectiveDepth from "$lib/components/ItemEffectiveDepth.svelte";
     import ItemImage from "$lib/components/ItemImage.svelte";
     import ItemOrderBook from "$lib/components/ItemOrderBook.svelte";
     import ItemPriceHistoryChart from "$lib/components/ItemPriceHistoryChart.svelte";
@@ -88,6 +89,19 @@
                     {/if}
                 </Card>
             </div>
+
+            <Card title="Effective Buy/Sell" class="effective-card">
+                {#if marketReport}
+                    <ItemEffectiveDepth
+                        effectiveBuy={marketReport.effectiveBuy}
+                        effectiveSell={marketReport.effectiveSell}
+                    />
+                {:else}
+                    <p class="empty-state">
+                        No effective depth data available.
+                    </p>
+                {/if}
+            </Card>
         {:else}
             <Card title="Item">
                 <p class="empty-state">GraphQL check failed: {data.error}</p>
@@ -171,6 +185,14 @@
     }
 
     :global(div.orderbook-card > div.body) {
+        padding-top: 12px;
+    }
+
+    :global(div.effective-card) {
+        margin-top: 12px;
+    }
+
+    :global(div.effective-card > div.body) {
         padding-top: 12px;
     }
 
