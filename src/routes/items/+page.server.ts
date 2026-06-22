@@ -5,33 +5,10 @@ import type {
     ItemsPageLoadData,
     ItemsQueryResult,
 } from "$lib";
+import { MARKET_ITEM_CODES } from "$lib/helpers";
 import { runGraphQL } from "$lib/server/graphql/client";
 
-const ITEM_CODES = [
-    "case1",
-    "case2",
-    "scraps",
-    "cocain",
-    "coca",
-    "heavyAmmo",
-    "ammo",
-    "lightAmmo",
-    "lead",
-    "cookedFish",
-    "steak",
-    "bread",
-    "fish",
-    "livestock",
-    "grain",
-    "concrete",
-    "limestone",
-    "steel",
-    "iron",
-    "paper",
-    "wood",
-    "oil",
-    "petroleum",
-] as const;
+const ITEM_CODES = MARKET_ITEM_CODES;
 
 type ItemCandlePoint = {
     bucketStart: string;

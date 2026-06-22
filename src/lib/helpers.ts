@@ -20,6 +20,32 @@ export const formatCompactNumber = (value: number): string => {
     return value.toString();
 };
 
+export const MARKET_ITEM_CODES = [
+    "case1",
+    "case2",
+    "scraps",
+    "cocain",
+    "coca",
+    "heavyAmmo",
+    "ammo",
+    "lightAmmo",
+    "lead",
+    "cookedFish",
+    "steak",
+    "bread",
+    "fish",
+    "livestock",
+    "grain",
+    "concrete",
+    "limestone",
+    "steel",
+    "iron",
+    "paper",
+    "wood",
+    "oil",
+    "petroleum",
+] as const;
+
 export const ITEM_NAMES: Record<string, string> = {
     case1: "Case",
     case2: "Elite Case",
