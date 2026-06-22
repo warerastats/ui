@@ -1,126 +1,203 @@
 <script lang="ts">
+    import Card from "$lib/components/Card.svelte";
+    import Coin from "$lib/components/Coin.svelte";
+    import ItemImage from "$lib/components/ItemImage.svelte";
+    import ItemOrderBook from "$lib/components/ItemOrderBook.svelte";
+    import ItemPriceHistoryChart from "$lib/components/ItemPriceHistoryChart.svelte";
+    import Wrapper from "$lib/components/Wrapper.svelte";
+    import {
+        formatCompactNumber,
+        formatMoney,
+        getItemName,
+    } from "$lib/helpers";
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
+
+    let marketReport = $derived(data.marketReport);
+    let moneyVolume = $derived.by(() => {
+        if (!marketReport) {
+            return 0;
+        }
+        return marketReport.volume24h * marketReport.avgWeighted24h;
+    });
 </script>
 
-<h1>Item: {data.itemCode}</h1>
+<div class="page-content">
+    <Wrapper>
+        {#if data.ok}
+            <div class="item-header">
+                <ItemImage itemCode={data.itemCode} size={52} />
+                <div class="item-meta">
+                    <h1>{getItemName(data.itemCode)}</h1>
+                    <p>{data.itemCode}</p>
+                </div>
+            </div>
 
-{#if data.ok}
-    <section>
-        <h2>Market Report</h2>
-        {#if data.marketReport}
-            <ul>
-                <li>itemCode: {data.marketReport.itemCode}</li>
-                <li>volume24h: {data.marketReport.volume24h}</li>
-                <li>avgWeighted24h: {data.marketReport.avgWeighted24h}</li>
-                <li>pctChange24h: {data.marketReport.pctChange24h}%</li>
-                <li>low24h: {data.marketReport.low24h}</li>
-                <li>high24h: {data.marketReport.high24h}</li>
-                <li>spread: {data.marketReport.spread}</li>
-                <li>updatedAt: {data.marketReport.updatedAt}</li>
-            </ul>
+            <div class="stats-grid">
+                <Card class="stat-card" headerBorder={false}>
+                    <p class="label">Average Price</p>
+                    <p class="value coin-value">
+                        <Coin width="14px" height="14px" />
+                        {formatMoney(marketReport?.avgWeighted24h ?? 0, 4)}
+                    </p>
+                </Card>
 
-            <h3>Bids</h3>
-            {#if data.marketReport.bids.length === 0}
-                <p>No bids.</p>
-            {:else}
-                <ul>
-                    {#each data.marketReport.bids as bid, index (`bid-${index}`)}
-                        <li>price: {bid.price}, quantity: {bid.quantity}</li>
-                    {/each}
-                </ul>
-            {/if}
+                <Card class="stat-card" headerBorder={false}>
+                    <p class="label">Low 24h</p>
+                    <p class="value coin-value">
+                        <Coin width="14px" height="14px" />
+                        {formatMoney(marketReport?.low24h ?? 0, 4)}
+                    </p>
+                </Card>
 
-            <h3>Asks</h3>
-            {#if data.marketReport.asks.length === 0}
-                <p>No asks.</p>
-            {:else}
-                <ul>
-                    {#each data.marketReport.asks as ask, index (`ask-${index}`)}
-                        <li>price: {ask.price}, quantity: {ask.quantity}</li>
-                    {/each}
-                </ul>
-            {/if}
+                <Card class="stat-card" headerBorder={false}>
+                    <p class="label">High 24h</p>
+                    <p class="value coin-value">
+                        <Coin width="14px" height="14px" />
+                        {formatMoney(marketReport?.high24h ?? 0, 4)}
+                    </p>
+                </Card>
 
-            <h3>Effective Buy</h3>
-            {#if data.marketReport.effectiveBuy.length === 0}
-                <p>No effective buy entries.</p>
-            {:else}
-                <ul>
-                    {#each data.marketReport.effectiveBuy as level, index (`eb-${index}`)}
-                        <li>size: {level.size}, avgPrice: {level.avgPrice}</li>
-                    {/each}
-                </ul>
-            {/if}
+                <Card class="stat-card" headerBorder={false}>
+                    <p class="label">Volume</p>
+                    <p class="value coin-value">
+                        <Coin width="14px" height="14px" />
+                        {formatCompactNumber(moneyVolume)}
+                    </p>
+                </Card>
+            </div>
 
-            <h3>Effective Sell</h3>
-            {#if data.marketReport.effectiveSell.length === 0}
-                <p>No effective sell entries.</p>
-            {:else}
-                <ul>
-                    {#each data.marketReport.effectiveSell as level, index (`es-${index}`)}
-                        <li>size: {level.size}, avgPrice: {level.avgPrice}</li>
-                    {/each}
-                </ul>
-            {/if}
+            <div class="market-grid">
+                <Card title="Price History" class="price-card">
+                    <ItemPriceHistoryChart
+                        itemCode={data.itemCode}
+                        initialCandles={data.candles}
+                    />
+                </Card>
+
+                <Card title="Orderbook" class="orderbook-card">
+                    {#if marketReport}
+                        <ItemOrderBook
+                            bids={marketReport.bids}
+                            asks={marketReport.asks}
+                            spread={marketReport.spread}
+                        />
+                    {:else}
+                        <p class="empty-state">No orderbook data available.</p>
+                    {/if}
+                </Card>
+            </div>
         {:else}
-            <p>No market report available.</p>
+            <Card title="Item">
+                <p class="empty-state">GraphQL check failed: {data.error}</p>
+            </Card>
         {/if}
-    </section>
+    </Wrapper>
+</div>
 
-    <section>
-        <h2>Candles</h2>
-        {#if data.candles.length === 0}
-            <p>No candles available.</p>
-        {:else}
-            <ul>
-                {#each data.candles as candle (candle.bucketStart)}
-                    <li>
-                        bucketStart: {candle.bucketStart}, open: {candle.open},
-                        high: {candle.high}, low: {candle.low}, close: {candle.close},
-                        avg: {candle.avg}, volume: {candle.volume}, money: {candle.money},
-                        count: {candle.count}
-                    </li>
-                {/each}
-            </ul>
-        {/if}
-    </section>
-{:else}
-    <p>GraphQL check failed: {data.error}</p>
-{/if}
+<style lang="scss">
+    div.page-content {
+        margin: 24px 8px;
+    }
 
-<section>
-    <h2>Transactions</h2>
-    {#if data.transactions.length === 0}
-        <p>No transactions found.</p>
-    {:else}
-        <ul>
-            {#each data.transactions as transaction, index (`tx-${index}`)}
-                <li>
-                    <p>money: {transaction.money}</p>
-                    <p>quantity: {transaction.quantity}</p>
-                    <p>timeTillSale: {transaction.timeTillSale}</p>
-                    <p>
-                        seller: {transaction.seller.username} | buyer:
-                        {transaction.buyer.username}
-                    </p>
-                    <p>
-                        sellerMu: {transaction.sellerMu?.name ?? "None"} | buyerMu:
-                        {transaction.buyerMu?.name ?? "None"}
-                    </p>
-                    <p>
-                        sellerCountry:
-                        {transaction.sellerCountry
-                            ? `${transaction.sellerCountry.name} (${transaction.sellerCountry.code})`
-                            : "None"}
-                        | buyerCountry:
-                        {transaction.buyerCountry
-                            ? `${transaction.buyerCountry.name} (${transaction.buyerCountry.code})`
-                            : "None"}
-                    </p>
-                </li>
-            {/each}
-        </ul>
-    {/if}
-</section>
+    div.item-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    div.item-meta {
+        h1 {
+            margin: 0;
+            color: #c2c6d6;
+            font-size: 30px;
+            line-height: 1.1;
+        }
+
+        p {
+            margin: 2px 0 0;
+            color: #8c909f;
+            font-size: 13px;
+        }
+    }
+
+    div.stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    :global(div.stat-card > div.body) {
+        gap: 6px;
+        padding: 14px;
+    }
+
+    p.label {
+        margin: 0;
+        color: #8c909f;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        font-weight: 700;
+    }
+
+    p.value {
+        margin: 0;
+        color: #c2c6d6;
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+    p.coin-value {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    div.market-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    :global(div.price-card > div.body) {
+        padding-top: 12px;
+        flex: 1;
+        min-height: 480px;
+    }
+
+    :global(div.orderbook-card > div.body) {
+        padding-top: 12px;
+    }
+
+    p.empty-state {
+        margin: 0;
+        color: #8c909f;
+    }
+
+    @media (max-width: 1050px) {
+        div.stats-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        div.market-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 560px) {
+        div.item-meta {
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        div.stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

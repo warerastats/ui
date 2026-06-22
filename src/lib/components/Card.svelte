@@ -44,9 +44,9 @@
     div.header {
         padding: 24px 24px 0;
 
-        &:has(.title) {
-            border-bottom: #353535 1px solid;
-        }
+        // &:has(.title) {
+        //     border-bottom: #353535 1px solid;
+        // }
 
         &.no-border {
             border-bottom: none;

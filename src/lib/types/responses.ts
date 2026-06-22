@@ -94,6 +94,11 @@ export type ItemTransactionsApiResponse = {
     error?: string;
 };
 
+export type ItemCandlesApiResponse = {
+    candles: ItemCandle[];
+    error?: string;
+};
+
 export type DamageReportsApiResponse = {
     reports: DamageReport[];
     error?: string;

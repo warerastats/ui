@@ -35,6 +35,7 @@
         "wrangler": "^4.98.0"
     },
     "dependencies": {
-        "graphql": "^16.14.1"
+        "graphql": "^16.14.1",
+        "klinecharts": "10.0.0-beta3"
     }
 }

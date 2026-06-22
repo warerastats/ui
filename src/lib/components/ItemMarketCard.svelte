@@ -88,7 +88,8 @@
                 </div>
                 <div class="metric">
                     <span class="label">Price</span>
-                    <span class="value">
+                    <span class="value coin-value">
+                        <Coin width="12px" height="12px" />
                         {formatMoney(item.report.avgWeighted24h, 3)}
                     </span>
                 </div>

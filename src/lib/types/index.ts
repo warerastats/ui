@@ -87,6 +87,7 @@ export type {
     ItemDetailPageLoadFailure,
     ItemDetailPageLoadSuccess,
     ItemDetailQueryResult,
+    ItemCandlesApiResponse,
     ItemTransactionsApiResponse,
     ItemTransactionsQueryResult,
     ItemsPageLoadData,

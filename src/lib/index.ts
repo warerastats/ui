@@ -37,6 +37,7 @@ export type {
     ItemDetailPageLoadFailure,
     ItemDetailPageLoadSuccess,
     ItemDetailQueryResult,
+    ItemCandlesApiResponse,
     ItemEffectivePrice,
     ItemHourlySeries,
     ItemMarketReport,
