@@ -51,58 +51,92 @@
     }
 </script>
 
-<Card class="item-card" headerBorder={false}>
-    <div class="sparkline-bg" aria-hidden="true">
-        {#if item.hourlyAvgPrices.length > 1}
-            <svg viewBox="0 0 220 74" preserveAspectRatio="none">
-                <polyline
-                    class:negative={item.report && item.report.pctChange24h < 0}
-                    points={buildSparklinePoints(item.hourlyAvgPrices)}
-                ></polyline>
-            </svg>
+<a
+    href={`/item/${item.itemCode}`}
+    class="item-link"
+    aria-label={`Open ${getItemName(item.itemCode)}`}
+>
+    <Card class="item-card" headerBorder={false}>
+        <div class="sparkline-bg" aria-hidden="true">
+            {#if item.hourlyAvgPrices.length > 1}
+                <svg viewBox="0 0 220 74" preserveAspectRatio="none">
+                    <polyline
+                        class:negative={item.report &&
+                            item.report.pctChange24h < 0}
+                        points={buildSparklinePoints(item.hourlyAvgPrices)}
+                    ></polyline>
+                </svg>
+            {/if}
+        </div>
+
+        <div class="item-header">
+            <ItemImage itemCode={item.itemCode} size={32} />
+            <div class="title-wrap">
+                <h2>{getItemName(item.itemCode)}</h2>
+                <p class="code">{item.itemCode}</p>
+            </div>
+        </div>
+
+        {#if item.report}
+            <div class="metrics">
+                <div class="metric">
+                    <span class="label">Volume</span>
+                    <span class="value coin-value">
+                        <Coin width="12px" height="12px" />
+                        {formatCompactNumber(getMoneyVolume())}
+                    </span>
+                </div>
+                <div class="metric">
+                    <span class="label">Price</span>
+                    <span class="value">
+                        {formatMoney(item.report.avgWeighted24h, 3)}
+                    </span>
+                </div>
+                <div class="metric">
+                    <span class="label">Change</span>
+                    <span
+                        class="value pct"
+                        class:positive={item.report.pctChange24h >= 0}
+                        class:negative={item.report.pctChange24h < 0}
+                    >
+                        {formatPct(item.report.pctChange24h)}
+                    </span>
+                </div>
+            </div>
+        {:else}
+            <p class="empty-state">No market report available.</p>
         {/if}
-    </div>
-
-    <div class="item-header">
-        <ItemImage itemCode={item.itemCode} size={32} />
-        <div class="title-wrap">
-            <h2>{getItemName(item.itemCode)}</h2>
-            <p class="code">{item.itemCode}</p>
-        </div>
-    </div>
-
-    {#if item.report}
-        <div class="metrics">
-            <div class="metric">
-                <span class="label">Volume</span>
-                <span class="value coin-value">
-                    <Coin width="12px" height="12px" />
-                    {formatCompactNumber(getMoneyVolume())}
-                </span>
-            </div>
-            <div class="metric">
-                <span class="label">Price</span>
-                <span class="value">
-                    {formatMoney(item.report.avgWeighted24h, 3)}
-                </span>
-            </div>
-            <div class="metric">
-                <span class="label">Change</span>
-                <span
-                    class="value pct"
-                    class:positive={item.report.pctChange24h >= 0}
-                    class:negative={item.report.pctChange24h < 0}
-                >
-                    {formatPct(item.report.pctChange24h)}
-                </span>
-            </div>
-        </div>
-    {:else}
-        <p class="empty-state">No market report available.</p>
-    {/if}
-</Card>
+    </Card>
+</a>
 
 <style lang="scss">
+    a.item-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 8px;
+
+        &:focus-visible {
+            outline: 2px solid #4af0c0;
+            outline-offset: 3px;
+        }
+
+        &:hover {
+            :global(div.item-card) {
+                transform: translateY(-1px);
+                transition: transform 0.15s ease;
+            }
+
+            div.sparkline-bg {
+                opacity: 0.5;
+            }
+        }
+    }
+
+    :global(div.item-card) {
+        transition: transform 0.15s ease;
+    }
+
     :global(div.item-card > div.body) {
         position: relative;
         overflow: hidden;
