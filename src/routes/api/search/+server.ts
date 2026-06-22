@@ -27,6 +27,10 @@ const SEARCH_QUERY = `
         username
         avatarUrl
       }
+      ... on Alliance {
+        id
+        name
+      }
     }
   }
 `;

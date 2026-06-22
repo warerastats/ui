@@ -2,6 +2,7 @@ import type {
     Alliance,
     Battle,
     BattleSummary,
+    DamageReport,
     InflationPoint,
     ItemCandle,
     ItemHourlySeries,
@@ -90,6 +91,11 @@ export type ItemTransactionsQueryResult = {
 
 export type ItemTransactionsApiResponse = {
     results: TradeTransactionEdge[];
+    error?: string;
+};
+
+export type DamageReportsApiResponse = {
+    reports: DamageReport[];
     error?: string;
 };
 

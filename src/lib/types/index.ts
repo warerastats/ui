@@ -109,6 +109,7 @@ export type {
     BattlePageLoadFailure,
     BattlePageLoadSuccess,
     BattleQueryResult,
+    DamageReportsApiResponse,
     UserPageLoadData,
     UserPageLoadFailure,
     UserPageLoadSuccess,

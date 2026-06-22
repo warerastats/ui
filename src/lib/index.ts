@@ -26,6 +26,7 @@ export type {
     CountrySummary,
     DamageReport,
     DamageReportEquipment,
+    DamageReportsApiResponse,
     IndexPageLoadData,
     IndexPageLoadFailure,
     IndexPageLoadSuccess,

@@ -1,6 +1,7 @@
 <script lang="ts">
     import Card from "$lib/components/Card.svelte";
     import CountryFlag from "$lib/components/CountryFlag.svelte";
+    import EntityFilter from "$lib/components/EntityFilter.svelte";
     import ItemImage from "$lib/components/ItemImage.svelte";
     import Wrapper from "$lib/components/Wrapper.svelte";
     import {
@@ -8,6 +9,8 @@
         formatCompactNumber,
         formatMoney,
     } from "$lib/helpers";
+    import type { BattleSideReportSummary } from "$lib/helpers";
+    import type { DamageReportsApiResponse } from "$lib";
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
@@ -118,6 +121,79 @@
 
         return Math.max((value / max) * 100, 6);
     }
+
+    // --- Filter state ---
+    type SelectedEntity = {
+        kind: "USER" | "COUNTRY" | "PARTY" | "MU" | "ALLIANCE";
+        id: string;
+        name: string;
+    };
+
+    let filterEntity = $state<SelectedEntity | null>(null);
+    let filterSummary = $state<BattleSideReportSummary | null>(null);
+    let filterLoading = $state(false);
+
+    let filteredBucketedTimeline = $derived(
+        filterSummary
+            ? buildBucketedTimeline(
+                  filterSummary.timeline,
+                  timelineWindowMinutes,
+              )
+            : [],
+    );
+
+    // Build a lookup map from intervalStart → bucket for filtered data
+    let filteredBucketMap = $derived.by(() => {
+        const map = new Map<string, TimelineBucket>();
+        for (const bucket of filteredBucketedTimeline) {
+            map.set(bucket.intervalStart, bucket);
+        }
+        return map;
+    });
+
+    // Build lookup maps for filtered equipment by itemCode per side
+    let filteredEquipmentMap = $derived.by(() => {
+        const attacker = new Map<string, { count: number; value: number }>();
+        const defender = new Map<string, { count: number; value: number }>();
+        if (filterSummary) {
+            for (const eq of filterSummary.equipmentBySide.attacker) {
+                attacker.set(eq.itemCode, { count: eq.count, value: eq.value });
+            }
+            for (const eq of filterSummary.equipmentBySide.defender) {
+                defender.set(eq.itemCode, { count: eq.count, value: eq.value });
+            }
+        }
+        return { attacker, defender };
+    });
+
+    $effect(() => {
+        const entity = filterEntity;
+
+        if (!entity || !data.id) {
+            filterSummary = null;
+            return;
+        }
+
+        filterLoading = true;
+
+        const url = `/api/battle/${data.id}/damage-reports?entityKind=${encodeURIComponent(entity.kind)}&entityIds=${encodeURIComponent(entity.id)}`;
+
+        fetch(url)
+            .then((res) => res.json() as Promise<DamageReportsApiResponse>)
+            .then((body) => {
+                if (body.error) {
+                    filterSummary = null;
+                    return;
+                }
+                filterSummary = buildBattleSideReportSummary(body.reports);
+            })
+            .catch(() => {
+                filterSummary = null;
+            })
+            .finally(() => {
+                filterLoading = false;
+            });
+    });
 </script>
 
 {#if data.ok && data.battle}
@@ -252,11 +328,36 @@
                                     >
                                 </div>
 
+                                {#if filterSummary && filterEntity}
+                                    <div class="metric-values filter-row">
+                                        <span class="filter-value">
+                                            {#if filterSummary.damageTotals.attacker > 0}
+                                                {filterEntity.name}: {formatCompactNumber(
+                                                    filterSummary.damageTotals
+                                                        .attacker,
+                                                )}
+                                            {/if}
+                                        </span>
+                                        <span class="filter-value">
+                                            {#if filterSummary.damageTotals.defender > 0}
+                                                {filterEntity.name}: {formatCompactNumber(
+                                                    filterSummary.damageTotals
+                                                        .defender,
+                                                )}
+                                            {/if}
+                                        </span>
+                                    </div>
+                                {/if}
+
                                 <div class="compact-timeline">
                                     {#each bucketedTimeline as point (point.intervalStart)}
+                                        {@const filtered =
+                                            filteredBucketMap.get(
+                                                point.intervalStart,
+                                            )}
                                         <div
                                             class="timeline-point"
-                                            title={`Attacker ${formatCompactNumber(point.attackerDamage)} vs Defender ${formatCompactNumber(point.defenderDamage)}`}
+                                            title={`Attacker ${formatCompactNumber(point.attackerDamage)} vs Defender ${formatCompactNumber(point.defenderDamage)}${filtered ? ` | Filter: A ${formatCompactNumber(filtered.attackerDamage)} D ${formatCompactNumber(filtered.defenderDamage)}` : ""}`}
                                         >
                                             {#if point.attackerDamage >= point.defenderDamage}
                                                 <div
@@ -277,8 +378,34 @@
                                                     style={`height: ${timelineBarHeight(point.attackerDamage, bucketedMaxTimelineDamage)}%`}
                                                 ></div>
                                             {/if}
+                                            {#if filtered}
+                                                {#if filtered.attackerDamage > 0}
+                                                    <div
+                                                        class="bar filter filter-attacker"
+                                                        style={`height: ${timelineBarHeight(filtered.attackerDamage, bucketedMaxTimelineDamage)}%`}
+                                                    ></div>
+                                                {/if}
+                                                {#if filtered.defenderDamage > 0}
+                                                    <div
+                                                        class="bar filter filter-defender"
+                                                        style={`height: ${timelineBarHeight(filtered.defenderDamage, bucketedMaxTimelineDamage)}%`}
+                                                    ></div>
+                                                {/if}
+                                            {/if}
                                         </div>
                                     {/each}
+                                </div>
+
+                                <div class="filter-section">
+                                    <EntityFilter
+                                        bind:selected={filterEntity}
+                                        placeholder="Filter by player, country, MU..."
+                                    />
+                                    {#if filterLoading}
+                                        <span class="filter-status"
+                                            >Loading...</span
+                                        >
+                                    {/if}
                                 </div>
 
                                 <div class="equipment-totals">
@@ -295,6 +422,17 @@
                                             )}
                                             btc</span
                                         >
+                                        {#if filterSummary && filterEntity && filterSummary.equipmentValueTotals.attacker > 0}
+                                            <span class="filter-sub"
+                                                >{filterEntity.name}: {formatMoney(
+                                                    filterSummary
+                                                        .equipmentValueTotals
+                                                        .attacker,
+                                                    0,
+                                                )}
+                                                btc</span
+                                            >
+                                        {/if}
                                     </div>
                                     <div class="total defender">
                                         <span class="label"
@@ -309,6 +447,17 @@
                                             )}
                                             btc</span
                                         >
+                                        {#if filterSummary && filterEntity && filterSummary.equipmentValueTotals.defender > 0}
+                                            <span class="filter-sub"
+                                                >{filterEntity.name}: {formatMoney(
+                                                    filterSummary
+                                                        .equipmentValueTotals
+                                                        .defender,
+                                                    0,
+                                                )}
+                                                btc</span
+                                            >
+                                        {/if}
                                     </div>
                                 </div>
 
@@ -322,6 +471,10 @@
                                         {:else}
                                             <ul>
                                                 {#each sideReportSummary.equipmentBySide.attacker as eq (eq.itemCode)}
+                                                    {@const fEq =
+                                                        filteredEquipmentMap.attacker.get(
+                                                            eq.itemCode,
+                                                        )}
                                                     <li>
                                                         <ItemImage
                                                             itemCode={eq.itemCode}
@@ -341,6 +494,27 @@
                                                             btc</span
                                                         >
                                                     </li>
+                                                    {#if fEq && filterEntity}
+                                                        <li class="filter-row">
+                                                            <span></span>
+                                                            <span
+                                                                class="filter-name"
+                                                                >{filterEntity.name}</span
+                                                            >
+                                                            <span
+                                                                class="filter-count"
+                                                                >{fEq.count}x</span
+                                                            >
+                                                            <span
+                                                                class="filter-value"
+                                                                >{formatMoney(
+                                                                    fEq.value,
+                                                                    0,
+                                                                )}
+                                                                btc</span
+                                                            >
+                                                        </li>
+                                                    {/if}
                                                 {/each}
                                             </ul>
                                         {/if}
@@ -355,6 +529,10 @@
                                         {:else}
                                             <ul>
                                                 {#each sideReportSummary.equipmentBySide.defender as eq (eq.itemCode)}
+                                                    {@const fEq =
+                                                        filteredEquipmentMap.defender.get(
+                                                            eq.itemCode,
+                                                        )}
                                                     <li>
                                                         <ItemImage
                                                             itemCode={eq.itemCode}
@@ -374,6 +552,27 @@
                                                             btc</span
                                                         >
                                                     </li>
+                                                    {#if fEq && filterEntity}
+                                                        <li class="filter-row">
+                                                            <span></span>
+                                                            <span
+                                                                class="filter-name"
+                                                                >{filterEntity.name}</span
+                                                            >
+                                                            <span
+                                                                class="filter-count"
+                                                                >{fEq.count}x</span
+                                                            >
+                                                            <span
+                                                                class="filter-value"
+                                                                >{formatMoney(
+                                                                    fEq.value,
+                                                                    0,
+                                                                )}
+                                                                btc</span
+                                                            >
+                                                        </li>
+                                                    {/if}
                                                 {/each}
                                             </ul>
                                         {/if}
@@ -674,6 +873,37 @@
         background: #7ea9e8;
     }
 
+    div.bar.filter {
+        z-index: 3;
+        width: 50%;
+        background: #4af0c0;
+        border-left: 1px solid rgba(0, 0, 0, 0.35);
+        border-right: 1px solid rgba(0, 0, 0, 0.35);
+        box-shadow: 0 0 4px rgba(74, 240, 192, 0.5);
+    }
+
+    div.filter-section {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        .filter-status {
+            font-size: 11px;
+            color: #4af0c0;
+            font-weight: 600;
+        }
+    }
+
+    div.metric-values.filter-row {
+        margin-top: -4px;
+        font-size: 12px;
+        font-weight: 700;
+
+        .filter-value {
+            color: #4af0c0;
+        }
+    }
+
     div.equipment-totals {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -709,6 +939,13 @@
 
         &.defender .value {
             color: #9dc4ff;
+        }
+
+        .filter-sub {
+            font-size: 11px;
+            font-weight: 700;
+            color: #4af0c0;
+            letter-spacing: -0.1px;
         }
     }
 
@@ -771,6 +1008,29 @@
         .item-value {
             font-weight: 700;
             letter-spacing: -0.2px;
+        }
+
+        li.filter-row {
+            font-size: 11px;
+            margin-top: -3px;
+
+            .filter-name {
+                color: #4af0c0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .filter-count {
+                color: #4af0c0;
+                font-weight: 600;
+            }
+
+            .filter-value {
+                color: #4af0c0;
+                font-weight: 700;
+                letter-spacing: -0.2px;
+            }
         }
     }
 
