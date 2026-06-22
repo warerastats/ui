@@ -40,6 +40,9 @@ export type BattleTopDamageEntry = {
         id: string;
         username: string;
         avatarUrl: string;
+        country: {
+            code: string;
+        } | null;
     };
 };
 

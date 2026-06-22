@@ -130,13 +130,32 @@
         name: string;
     };
 
-    type BattleContentTab = "damageReports" | "orderChanges";
+    type BattleContentTab = "damageReports" | "orderChanges" | "topDamage";
+
+    type TopDamageUserDetails = {
+        loading: boolean;
+        error: string | null;
+        summary: BattleSideReportSummary | null;
+    };
+
+    type TopDamageGearItem = {
+        side: "attacker" | "defender";
+        itemCode: string;
+        itemName: string;
+        count: number;
+        value: number;
+    };
 
     let activeBattleTab = $state<BattleContentTab>("damageReports");
+    let topDamageDetailsByUser = $state<Record<string, TopDamageUserDetails>>(
+        {},
+    );
+    let topDamageRequested = $state(false);
 
     let filterEntity = $state<SelectedEntity | null>(null);
     let filterSummary = $state<BattleSideReportSummary | null>(null);
     let filterLoading = $state(false);
+    let topDamageEntries = $derived(data.battle?.topDamage ?? []);
 
     let filteredBucketedTimeline = $derived(
         filterSummary
@@ -199,6 +218,111 @@
                 filterLoading = false;
             });
     });
+
+    $effect(() => {
+        if (!data.id || activeBattleTab !== "topDamage" || topDamageRequested) {
+            return;
+        }
+
+        const entries = topDamageEntries;
+        if (entries.length === 0) {
+            topDamageRequested = true;
+            return;
+        }
+
+        topDamageRequested = true;
+
+        const initialState = { ...topDamageDetailsByUser };
+        for (const entry of entries) {
+            initialState[entry.user.id] = {
+                loading: true,
+                error: null,
+                summary: null,
+            };
+        }
+        topDamageDetailsByUser = initialState;
+
+        Promise.all(
+            entries.map(async (entry) => {
+                const userId = entry.user.id;
+                try {
+                    const response = await fetch(
+                        `/api/battle/${data.id}/damage-reports?entityKind=USER&entityIds=${encodeURIComponent(userId)}`,
+                    );
+                    const body =
+                        (await response.json()) as DamageReportsApiResponse;
+                    if (!response.ok || body.error) {
+                        return {
+                            userId,
+                            error:
+                                body.error ??
+                                "Failed to load user damage reports",
+                            summary: null,
+                        };
+                    }
+
+                    return {
+                        userId,
+                        error: null,
+                        summary: buildBattleSideReportSummary(body.reports),
+                    };
+                } catch (error) {
+                    return {
+                        userId,
+                        error:
+                            error instanceof Error
+                                ? error.message
+                                : "Unknown error",
+                        summary: null,
+                    };
+                }
+            }),
+        ).then((results) => {
+            const next = { ...topDamageDetailsByUser };
+            for (const result of results) {
+                next[result.userId] = {
+                    loading: false,
+                    error: result.error,
+                    summary: result.summary,
+                };
+            }
+            topDamageDetailsByUser = next;
+        });
+    });
+
+    function buildTopDamageGear(
+        summary: BattleSideReportSummary,
+        limit = 8,
+    ): TopDamageGearItem[] {
+        const merged: TopDamageGearItem[] = [];
+        for (const item of summary.equipmentBySide.attacker) {
+            merged.push({
+                side: "attacker",
+                itemCode: item.itemCode,
+                itemName: item.itemName,
+                count: item.count,
+                value: item.value,
+            });
+        }
+        for (const item of summary.equipmentBySide.defender) {
+            merged.push({
+                side: "defender",
+                itemCode: item.itemCode,
+                itemName: item.itemName,
+                count: item.count,
+                value: item.value,
+            });
+        }
+
+        return merged
+            .sort(
+                (a, b) =>
+                    b.value - a.value ||
+                    b.count - a.count ||
+                    a.itemName.localeCompare(b.itemName),
+            )
+            .slice(0, limit);
+    }
 
     function getOrderChangeSide(
         value: string,
@@ -370,6 +494,16 @@
                             }}
                         >
                             Order Changes
+                        </button>
+                        <button
+                            type="button"
+                            class="battle-tab"
+                            class:active={activeBattleTab === "topDamage"}
+                            onclick={() => {
+                                activeBattleTab = "topDamage";
+                            }}
+                        >
+                            Top Damage
                         </button>
                     </div>
 
@@ -657,7 +791,7 @@
                                 </div>
                             </div>
                         {/if}
-                    {:else}
+                    {:else if activeBattleTab === "orderChanges"}
                         <div class="order-changes-panel">
                             {#if data.battle.orderChanges.length === 0}
                                 <p class="empty-state">No order changes.</p>
@@ -768,6 +902,132 @@
                                 </ul>
                             {/if}
                         </div>
+                    {:else}
+                        <div class="top-damage-panel">
+                            {#if topDamageEntries.length === 0}
+                                <p class="empty-state">No top damage data.</p>
+                            {:else}
+                                <ul class="top-damage-list">
+                                    {#each topDamageEntries as entry, index (`${entry.user.id}-${index}`)}
+                                        {@const detail =
+                                            topDamageDetailsByUser[
+                                                entry.user.id
+                                            ]}
+                                        <li class="top-damage-row">
+                                            <div class="top-damage-rank">
+                                                #{index + 1}
+                                            </div>
+
+                                            <a
+                                                class="top-damage-user"
+                                                href={`/user/${entry.user.id}`}
+                                            >
+                                                <UserAvatar
+                                                    src={entry.user.avatarUrl}
+                                                    alt={`${entry.user.username} avatar`}
+                                                    width="22px"
+                                                    height="22px"
+                                                />
+                                                {#if entry.user.country?.code}
+                                                    <CountryFlag
+                                                        code={entry.user.country
+                                                            .code}
+                                                        alt={`${entry.user.username} country`}
+                                                        width="14px"
+                                                        height="14px"
+                                                    />
+                                                {/if}
+                                                <span class="name"
+                                                    >{entry.user.username}</span
+                                                >
+                                            </a>
+
+                                            <div class="top-damage-total">
+                                                {formatCompactNumber(
+                                                    entry.totalDamage,
+                                                )}
+                                            </div>
+
+                                            <div class="top-damage-sides">
+                                                {#if detail?.loading}
+                                                    <span
+                                                        class="top-damage-loading"
+                                                        >Loading details...</span
+                                                    >
+                                                {:else if detail?.error}
+                                                    <span
+                                                        class="top-damage-error"
+                                                        >{detail.error}</span
+                                                    >
+                                                {:else if detail?.summary}
+                                                    <span class="side attacker"
+                                                        >A {formatCompactNumber(
+                                                            detail.summary
+                                                                .damageTotals
+                                                                .attacker,
+                                                        )}</span
+                                                    >
+                                                    <span class="side defender"
+                                                        >D {formatCompactNumber(
+                                                            detail.summary
+                                                                .damageTotals
+                                                                .defender,
+                                                        )}</span
+                                                    >
+                                                {/if}
+                                            </div>
+
+                                            <div class="top-damage-gear">
+                                                {#if detail?.summary}
+                                                    {@const gear =
+                                                        buildTopDamageGear(
+                                                            detail.summary,
+                                                            8,
+                                                        )}
+                                                    {#if gear.length === 0}
+                                                        <span
+                                                            class="top-damage-empty"
+                                                            >No equipment used</span
+                                                        >
+                                                    {:else}
+                                                        <ul>
+                                                            {#each gear as item (`${item.side}-${item.itemCode}`)}
+                                                                <li>
+                                                                    <span
+                                                                        class="gear-side"
+                                                                        class:attacker={item.side ===
+                                                                            "attacker"}
+                                                                        class:defender={item.side ===
+                                                                            "defender"}
+                                                                    >
+                                                                        {item.side ===
+                                                                        "attacker"
+                                                                            ? "A"
+                                                                            : "D"}
+                                                                    </span>
+                                                                    <ItemImage
+                                                                        itemCode={item.itemCode}
+                                                                        size={16}
+                                                                    />
+                                                                    <span
+                                                                        class="gear-name"
+                                                                        >{item.itemName}</span
+                                                                    >
+                                                                    <span
+                                                                        class="gear-count"
+                                                                        >{item.count}x</span
+                                                                    >
+                                                                </li>
+                                                            {/each}
+                                                        </ul>
+                                                    {/if}
+                                                {/if}
+                                            </div>
+                                        </li>
+                                    {/each}
+                                </ul>
+                            {/if}
+                        </div>
                     {/if}
                 </Card>
             {:else}
@@ -844,6 +1104,159 @@
         background: #1f1f1f;
         border-radius: 4px;
         padding: 12px;
+    }
+
+    div.top-damage-panel {
+        border: 1px solid #353535;
+        background: #1f1f1f;
+        border-radius: 4px;
+        padding: 12px;
+    }
+
+    ul.top-damage-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    li.top-damage-row {
+        border: 1px solid #353535;
+        background: #242424;
+        border-radius: 4px;
+        padding: 8px 10px;
+        display: grid;
+        grid-template-columns: 42px 1fr auto auto;
+        gap: 10px;
+        align-items: center;
+    }
+
+    div.top-damage-rank {
+        color: #8c909f;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    a.top-damage-user {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        color: #c2c6d6;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+
+        .name {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        &:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+    }
+
+    div.top-damage-total {
+        color: #ffd6aa;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: -0.2px;
+        text-align: right;
+    }
+
+    div.top-damage-sides {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+
+        .side {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 3px;
+            border: 1px solid #3d3d3d;
+            background: #2a2a2a;
+        }
+
+        .side.attacker {
+            color: #ffb4ab;
+            border-color: rgba(255, 132, 117, 0.5);
+        }
+
+        .side.defender {
+            color: #9dc4ff;
+            border-color: rgba(126, 169, 232, 0.5);
+        }
+    }
+
+    span.top-damage-loading,
+    span.top-damage-error,
+    span.top-damage-empty {
+        color: #8c909f;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    span.top-damage-error {
+        color: #ffb4ab;
+    }
+
+    div.top-damage-gear {
+        grid-column: 1 / -1;
+
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        li {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: 1px solid #353535;
+            background: #2a2a2a;
+            border-radius: 3px;
+            padding: 3px 6px;
+            color: #c2c6d6;
+            font-size: 11px;
+        }
+
+        .gear-side {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .gear-side.attacker {
+            color: #ffb4ab;
+        }
+
+        .gear-side.defender {
+            color: #9dc4ff;
+        }
+
+        .gear-name {
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .gear-count {
+            color: #8c909f;
+            font-weight: 700;
+        }
     }
 
     ul.order-changes-list {
@@ -1379,6 +1792,14 @@
     }
 
     @media (max-width: 900px) {
+        li.top-damage-row {
+            grid-template-columns: 1fr;
+        }
+
+        div.top-damage-total {
+            text-align: left;
+        }
+
         li.order-change-row {
             grid-template-columns: 1fr;
             gap: 6px;

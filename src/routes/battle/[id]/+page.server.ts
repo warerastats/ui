@@ -56,6 +56,10 @@ const BATTLE_QUERY = `
 					id
 					username
 					avatarUrl
+
+					country {
+						code
+					}
 				}
 			}
 
