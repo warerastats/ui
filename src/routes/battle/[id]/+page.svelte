@@ -3,6 +3,7 @@
     import CountryFlag from "$lib/components/CountryFlag.svelte";
     import EntityFilter from "$lib/components/EntityFilter.svelte";
     import ItemImage from "$lib/components/ItemImage.svelte";
+    import UserAvatar from "$lib/components/UserAvatar.svelte";
     import Wrapper from "$lib/components/Wrapper.svelte";
     import {
         buildBattleSideReportSummary,
@@ -129,6 +130,10 @@
         name: string;
     };
 
+    type BattleContentTab = "damageReports" | "orderChanges";
+
+    let activeBattleTab = $state<BattleContentTab>("damageReports");
+
     let filterEntity = $state<SelectedEntity | null>(null);
     let filterSummary = $state<BattleSideReportSummary | null>(null);
     let filterLoading = $state(false);
@@ -194,6 +199,51 @@
                 filterLoading = false;
             });
     });
+
+    function getOrderChangeSide(
+        value: string,
+    ): "attacker" | "defender" | "other" {
+        const lower = value.toLowerCase();
+        if (lower.includes("attacker")) {
+            return "attacker";
+        }
+        if (lower.includes("defender")) {
+            return "defender";
+        }
+        return "other";
+    }
+
+    function getOrderChangeSideInfo(value: string): {
+        tone: "attacker" | "defender" | "other";
+        sideLabel: string;
+        countryName: string;
+        countryCode: string | null;
+    } {
+        const tone = getOrderChangeSide(value);
+        if (tone === "attacker") {
+            return {
+                tone,
+                sideLabel: "Attacker",
+                countryName: data.battle?.attackerCountry?.name ?? "Unknown",
+                countryCode: data.battle?.attackerCountry?.code ?? null,
+            };
+        }
+        if (tone === "defender") {
+            return {
+                tone,
+                sideLabel: "Defender",
+                countryName: data.battle?.defenderCountry?.name ?? "Unknown",
+                countryCode: data.battle?.defenderCountry?.code ?? null,
+            };
+        }
+
+        return {
+            tone,
+            sideLabel: value,
+            countryName: "Unknown",
+            countryCode: null,
+        };
+    }
 </script>
 
 {#if data.ok && data.battle}
@@ -295,11 +345,38 @@
     <Wrapper>
         {#if data.ok}
             {#if data.battle}
-                <Card title="Damage Reports" headerBorder={false}>
-                    {#if data.battle.damageReports.length === 0}
-                        <p class="empty-state">No damage reports.</p>
-                    {:else}
-                        {#if sideReportSummary}
+                <Card title="Battle Activity" headerBorder={false}>
+                    <div
+                        class="battle-tabs"
+                        role="tablist"
+                        aria-label="Battle content tabs"
+                    >
+                        <button
+                            type="button"
+                            class="battle-tab"
+                            class:active={activeBattleTab === "damageReports"}
+                            onclick={() => {
+                                activeBattleTab = "damageReports";
+                            }}
+                        >
+                            Damage Reports
+                        </button>
+                        <button
+                            type="button"
+                            class="battle-tab"
+                            class:active={activeBattleTab === "orderChanges"}
+                            onclick={() => {
+                                activeBattleTab = "orderChanges";
+                            }}
+                        >
+                            Order Changes
+                        </button>
+                    </div>
+
+                    {#if activeBattleTab === "damageReports"}
+                        {#if data.battle.damageReports.length === 0}
+                            <p class="empty-state">No damage reports.</p>
+                        {:else if sideReportSummary}
                             <div class="battle-damage-viz">
                                 <div class="viz-header">
                                     <div class="side-label attacker">
@@ -580,6 +657,117 @@
                                 </div>
                             </div>
                         {/if}
+                    {:else}
+                        <div class="order-changes-panel">
+                            {#if data.battle.orderChanges.length === 0}
+                                <p class="empty-state">No order changes.</p>
+                            {:else}
+                                <ul class="order-changes-list">
+                                    {#each data.battle.orderChanges as change, index (`${change.at}-${change.side}-${change.kind}-${change.action}-${index}`)}
+                                        {@const sideInfo =
+                                            getOrderChangeSideInfo(change.side)}
+                                        <li class="order-change-row">
+                                            <div class="order-change-time">
+                                                {formatDate(change.at)}
+                                            </div>
+
+                                            <div class="order-change-main">
+                                                <div
+                                                    class="order-change-entity"
+                                                >
+                                                    {#if change.entity.__typename === "Country"}
+                                                        <a
+                                                            class="entity-link"
+                                                            href={`/country/${change.entity.id}`}
+                                                        >
+                                                            <CountryFlag
+                                                                code={change
+                                                                    .entity
+                                                                    .code}
+                                                                alt={change
+                                                                    .entity
+                                                                    .name}
+                                                                width="18px"
+                                                                height="18px"
+                                                            />
+                                                            <span
+                                                                class="entity-name"
+                                                                >{change.entity
+                                                                    .name}</span
+                                                            >
+                                                        </a>
+                                                    {:else if change.entity.__typename === "Mu"}
+                                                        <a
+                                                            class="entity-link"
+                                                            href={`/mu/${change.entity.id}`}
+                                                        >
+                                                            <UserAvatar
+                                                                src={change
+                                                                    .entity
+                                                                    .avatarUrl}
+                                                                alt={`${change.entity.name} avatar`}
+                                                                width="18px"
+                                                                height="18px"
+                                                            />
+                                                            {#if change.entity.region?.initialCountry?.code}
+                                                                <CountryFlag
+                                                                    code={change
+                                                                        .entity
+                                                                        .region
+                                                                        .initialCountry
+                                                                        .code}
+                                                                    alt={`${change.entity.name} country`}
+                                                                    width="12px"
+                                                                    height="12px"
+                                                                />
+                                                            {/if}
+                                                            <span
+                                                                class="entity-name"
+                                                                >{change.entity
+                                                                    .name}</span
+                                                            >
+                                                        </a>
+                                                    {/if}
+                                                </div>
+                                                <span
+                                                    class="order-change-action"
+                                                >
+                                                    {change.action.toLowerCase()}
+                                                </span>
+                                            </div>
+
+                                            <div
+                                                class="order-change-side-country"
+                                            >
+                                                <span
+                                                    class="order-change-side"
+                                                    class:attacker={sideInfo.tone ===
+                                                        "attacker"}
+                                                    class:defender={sideInfo.tone ===
+                                                        "defender"}
+                                                    class:other={sideInfo.tone ===
+                                                        "other"}
+                                                >
+                                                    {sideInfo.sideLabel}
+                                                </span>
+                                                {#if sideInfo.countryCode}
+                                                    <CountryFlag
+                                                        code={sideInfo.countryCode}
+                                                        alt={sideInfo.countryName}
+                                                        width="14px"
+                                                        height="14px"
+                                                    />
+                                                {/if}
+                                                <span
+                                                    class="order-change-country-name"
+                                                    >{sideInfo.countryName}</span
+                                                >
+                                            </div>
+                                        </li>
+                                    {/each}
+                                </ul>
+                            {/if}
+                        </div>
                     {/if}
                 </Card>
             {:else}
@@ -597,7 +785,6 @@
 
 <style lang="scss">
     div.battle-hero {
-        margin: -8px -8px 32px -8px;
         padding: 24px 8px;
         background: linear-gradient(135deg, #262626 0%, #2a2a2a 100%);
         border-bottom: 1px solid #353535;
@@ -618,6 +805,163 @@
     p.empty-state {
         margin: 0;
         color: #8c909f;
+    }
+
+    div.battle-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    button.battle-tab {
+        border: 1px solid #353535;
+        background: #1f1f1f;
+        color: #8c909f;
+        border-radius: 4px;
+        padding: 7px 10px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            color: #c2c6d6;
+            border-color: #4a4a4a;
+        }
+
+        &.active {
+            background: #252525;
+            color: #ffffff;
+            border-color: #4af0c0;
+            box-shadow: inset 0 0 0 1px rgba(74, 240, 192, 0.25);
+        }
+    }
+
+    div.order-changes-panel {
+        border: 1px solid #353535;
+        background: #1f1f1f;
+        border-radius: 4px;
+        padding: 12px;
+    }
+
+    ul.order-changes-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    li.order-change-row {
+        display: grid;
+        grid-template-columns: 180px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        border: 1px solid #353535;
+        background: #242424;
+        border-radius: 4px;
+        padding: 8px 10px;
+    }
+
+    div.order-change-time {
+        color: #8c909f;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    div.order-change-main {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    span.order-change-side {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        border: 1px solid #3d3d3d;
+        border-radius: 3px;
+        padding: 2px 6px;
+        color: #c2c6d6;
+        background: #2a2a2a;
+    }
+
+    span.order-change-side.attacker {
+        color: #ffb4ab;
+        border-color: rgba(255, 132, 117, 0.5);
+    }
+
+    span.order-change-side.defender {
+        color: #9dc4ff;
+        border-color: rgba(126, 169, 232, 0.5);
+    }
+
+    span.order-change-side.other {
+        color: #c2c6d6;
+    }
+
+    span.order-change-action {
+        color: #d6d8e0;
+        font-size: 12px;
+        font-weight: 700;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-transform: lowercase;
+    }
+
+    div.order-change-side-country {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    span.order-change-country-name {
+        color: #c2c6d6;
+        font-size: 12px;
+        font-weight: 700;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    div.order-change-entity {
+        min-width: 0;
+
+        a.entity-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #4af0c0;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            max-width: 100%;
+
+            &:hover {
+                text-decoration: underline;
+            }
+
+            .entity-name {
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            :global(img) {
+                border-radius: 2px;
+                flex-shrink: 0;
+            }
+        }
     }
 
     div.battle-title {
@@ -1035,6 +1379,11 @@
     }
 
     @media (max-width: 900px) {
+        li.order-change-row {
+            grid-template-columns: 1fr;
+            gap: 6px;
+        }
+
         div.compact-timeline {
             height: 72px;
             gap: 2px;

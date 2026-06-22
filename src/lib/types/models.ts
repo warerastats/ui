@@ -45,7 +45,17 @@ export type BattleTopDamageEntry = {
 
 export type BattleOrderChangeEntity =
     | { __typename: "Country"; id: string; name: string; code: string }
-    | { __typename: "Mu"; id: string; name: string; avatarUrl: string };
+    | {
+          __typename: "Mu";
+          id: string;
+          name: string;
+          avatarUrl: string;
+          region: {
+              initialCountry: {
+                  code: string;
+              } | null;
+          } | null;
+      };
 
 export type BattleOrderChange = {
     at: string;

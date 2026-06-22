@@ -59,7 +59,9 @@ const BATTLE_QUERY = `
 				}
 			}
 
-			orderChanges {
+			orderChanges (
+				first: 99999
+			) {
 				at
 				side
 				kind
@@ -69,12 +71,19 @@ const BATTLE_QUERY = `
 						id
 						name
 						code
+						__typename
 					}
 
 					... on Mu {
 						id
 						name
 						avatarUrl
+						__typename
+						region {
+                          	initialCountry {
+                            	code
+                          	}
+                        }
 					}
 				}
 			}

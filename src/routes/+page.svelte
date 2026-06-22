@@ -1,5 +1,4 @@
 <script lang="ts">
-    import type { SearchApiResponse, SearchResultItem } from "$lib";
     import Battle from "$lib/components/Battle.svelte";
     import Card from "$lib/components/Card.svelte";
     import InflationChart from "$lib/components/InflationChart.svelte";
@@ -9,75 +8,9 @@
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
-    let searchTerm = $state("");
-    let searchResults = $state<SearchResultItem[]>([]);
-    let searchError = $state<string | null>(null);
-    let isSearching = $state(false);
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-    let latestRequestId = 0;
-
-    $effect(() => {
-        const term = searchTerm.trim();
-
-        if (debounceTimer) {
-            clearTimeout(debounceTimer);
-        }
-
-        if (term.length <= 2) {
-            searchResults = [];
-            searchError = null;
-            isSearching = false;
-            return;
-        }
-
-        debounceTimer = setTimeout(async () => {
-            const requestId = ++latestRequestId;
-            isSearching = true;
-            searchError = null;
-
-            try {
-                const response = await fetch(
-                    `/api/search?term=${encodeURIComponent(term)}&limit=10`,
-                );
-                const body = (await response.json()) as SearchApiResponse;
-
-                if (requestId !== latestRequestId) {
-                    return;
-                }
-
-                if (!response.ok) {
-                    searchResults = [];
-                    searchError = body.error ?? "Search request failed";
-                    return;
-                }
-
-                searchResults = body.results;
-            } catch (error) {
-                if (requestId !== latestRequestId) {
-                    return;
-                }
-
-                searchResults = [];
-                searchError =
-                    error instanceof Error
-                        ? error.message
-                        : "Unknown search error";
-            } finally {
-                if (requestId === latestRequestId) {
-                    isSearching = false;
-                }
-            }
-        }, 800);
-
-        return () => {
-            if (debounceTimer) {
-                clearTimeout(debounceTimer);
-            }
-        };
-    });
 </script>
 
-<div style="margin: 0 8px; margin-top: 60px;">
+<div class="section section-search">
     <Wrapper>
         <Search />
     </Wrapper>
@@ -85,10 +18,10 @@
 
 {#if data.ok}
     {#if data.latestMarketState}
-        <div style="margin: 0 8px; margin-top: 48px;">
+        <div class="section section-stats">
             <Wrapper>
                 <div class="cards-3">
-                    <div style="flex: 1">
+                    <div class="stat-card-wrap">
                         <Card>
                             {#snippet header()}
                                 <div class="card-header">
@@ -106,7 +39,8 @@
                             </p>
                         </Card>
                     </div>
-                    <div style="flex: 1">
+
+                    <div class="stat-card-wrap">
                         <Card>
                             {#snippet header()}
                                 <div class="card-header">
@@ -126,7 +60,7 @@
                         </Card>
                     </div>
 
-                    <div style="flex: 1">
+                    <div class="stat-card-wrap">
                         <Card>
                             {#snippet header()}
                                 <div class="card-header">
@@ -151,7 +85,7 @@
     {/if}
 
     {#if data.inflation || data.battles}
-        <div style="margin: 0 8px; margin-top: 24px;">
+        <div class="section section-content">
             <Wrapper>
                 <div class="row">
                     {#if data.inflation}
@@ -198,48 +132,31 @@
     {/if}
 {/if}
 
-<h1>WareraStats UI</h1>
-<p>This page loads GraphQL data through server-only code.</p>
-
-<section>
-    <h2>Live Search</h2>
-    <input
-        type="search"
-        placeholder="Type at least 3 characters"
-        bind:value={searchTerm}
-    />
-
-    {#if searchTerm.trim().length > 2}
-        {#if isSearching}
-            <p>Searching...</p>
-        {:else if searchError}
-            <p>Search failed: {searchError}</p>
-        {:else if searchResults.length === 0}
-            <p>No results found.</p>
-        {:else}
-            <ul>
-                {#each searchResults as item (item.__typename + ":" + item.id)}
-                    <li>
-                        {#if item.__typename === "Country"}
-                            Country: {item.name} ({item.code})
-                        {:else if item.__typename === "Mu"}
-                            MU: {item.name}
-                        {:else if item.__typename === "Party"}
-                            Party: {item.name}
-                        {:else}
-                            User: {item.username}
-                        {/if}
-                    </li>
-                {/each}
-            </ul>
-        {/if}
-    {/if}
-</section>
-
 <style lang="scss">
+    div.section {
+        margin: 0 8px;
+    }
+
+    div.section-search {
+        margin-top: 60px;
+    }
+
+    div.section-stats {
+        margin-top: 48px;
+    }
+
+    div.section-content {
+        margin-top: 24px;
+        margin-bottom: 24px;
+    }
+
     div.cards-3 {
         display: flex;
         gap: 24px;
+    }
+
+    div.stat-card-wrap {
+        flex: 1;
     }
 
     div.inflation-row {
@@ -282,5 +199,21 @@
 
     div.battles {
         flex: 1;
+    }
+
+    @media (max-width: 900px) {
+        div.cards-3,
+        div.row {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        div.inflation-row {
+            width: 100%;
+        }
+
+        div.section-search {
+            margin-top: 36px;
+        }
     }
 </style>
