@@ -22,6 +22,7 @@ function getLast7CompletedDaysWindow() {
 const USER_QUERY = `
 	query UserDetailData($id: ID!, $from: DateTime!, $to: DateTime!) {
 		user(id: $id) {
+			id
 			username
 			level
 			militaryRank

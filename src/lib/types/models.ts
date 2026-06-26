@@ -696,9 +696,10 @@ export type BattleParticipation = {
 };
 
 export type User = {
+    id: string;
     username: string;
     level: number;
-    militaryRank: string;
+    militaryRank: number;
     avatarUrl: string;
     skills: UserSkill[];
     country: UserCountry | null;
