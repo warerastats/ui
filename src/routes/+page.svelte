@@ -162,6 +162,7 @@
     div.inflation-row {
         // 2 stat-card widths: 2 × (W - 2×24px) / 3 + 1 gap
         width: calc((100% - 48px) * 2 / 3 + 24px);
+        min-width: 0;
     }
 
     .card-header {
@@ -199,6 +200,7 @@
 
     div.battles {
         flex: 1;
+        min-width: 0;
     }
 
     @media (max-width: 900px) {

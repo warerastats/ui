@@ -65,6 +65,9 @@
         align-items: stretch;
         gap: 6px;
         height: 120px;
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
     }
 
     .bar-col {
@@ -72,7 +75,9 @@
         display: flex;
         flex-direction: column;
         flex: 1;
+        min-width: 0;
         align-items: center;
+        padding-bottom: 16px;
 
         &:hover::after {
             content: attr(data-pct);
@@ -99,6 +104,7 @@
         flex-direction: column;
         justify-content: flex-end;
         width: 100%;
+        min-height: 0;
     }
 
     .bar-bottom {
@@ -107,6 +113,7 @@
         flex-direction: column;
         justify-content: flex-start;
         width: 100%;
+        min-height: 0;
         border-top: 1px solid #353535;
     }
 
@@ -125,11 +132,15 @@
     }
 
     .bar-date {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
         font-size: 9px;
         color: #8c909f;
-        margin-top: 5px;
         text-align: center;
         white-space: nowrap;
+        pointer-events: none;
 
         &.hidden {
             visibility: hidden;
