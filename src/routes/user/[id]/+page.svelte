@@ -14,7 +14,14 @@
 
     let { data }: { data: PageData } = $props();
 
-    const HISTORY_TABS = ["names", "countries", "mu", "party", "wages", "skills"] as const;
+    const HISTORY_TABS = [
+        "names",
+        "countries",
+        "mu",
+        "party",
+        "wages",
+        "skills",
+    ] as const;
     type HistoryTab = (typeof HISTORY_TABS)[number];
     let activeHistoryTab = $state<HistoryTab>("names");
 
@@ -54,19 +61,27 @@
 
     let wealthTotal = $derived.by(() => {
         if (!data.ok || !data.user) return 0;
-        return (data.user.wealth ?? []).reduce((sum, entry) => sum + entry.value, 0);
+        return (data.user.wealth ?? []).reduce(
+            (sum, entry) => sum + entry.value,
+            0,
+        );
     });
 
     let participationPct = $derived.by(() => {
         if (!data.ok || !data.user) return 0;
         const total = data.user.battles?.length ?? 0;
         if (total === 0) return 0;
-        return (data.user.battleParticipation.battlesParticipated / total) * 100;
+        return (
+            (data.user.battleParticipation.battlesParticipated / total) * 100
+        );
     });
 
     let costPerDamage = $derived.by(() => {
         if (!data.ok || !data.user) return null;
-        return calculateCostPerDamage(data.user.wealth ?? [], data.user.battleParticipation.totalDamage);
+        return calculateCostPerDamage(
+            data.user.wealth ?? [],
+            data.user.battleParticipation.totalDamage,
+        );
     });
 
     let equipmentUsage = $derived.by(() => {
@@ -76,16 +91,23 @@
 
     let flipProfitPerTrade = $derived.by(() => {
         if (!data.ok || !data.user) return null;
-        return calculateFlipROI(data.user.flipState.totalProfit, data.user.flipState.totalFlips);
+        return calculateFlipROI(
+            data.user.flipState.totalProfit,
+            data.user.flipState.totalFlips,
+        );
     });
 
     let activeOffers = $derived.by(() => {
         if (!data.ok || !data.user) return [];
-        return (data.user.tradeOffers ?? []).filter((offer) => !offer.cancelled);
+        return (data.user.tradeOffers ?? []).filter(
+            (offer) => !offer.cancelled,
+        );
     });
 
     let fulfilledOffers = $derived.by(() => {
-        return activeOffers.filter((offer) => offer.fulfilled === offer.quantity);
+        return activeOffers.filter(
+            (offer) => offer.fulfilled === offer.quantity,
+        );
     });
 
     let recentBattles = $derived.by(() => {
@@ -162,7 +184,11 @@
             <div class="stats-grid">
                 <Card class="stat-card" headerBorder={false}>
                     <p class="label">Total Damage</p>
-                    <p class="value">{formatCompactNumber(data.user.battleParticipation.totalDamage)}</p>
+                    <p class="value">
+                        {formatCompactNumber(
+                            data.user.battleParticipation.totalDamage,
+                        )}
+                    </p>
                 </Card>
 
                 <Card class="stat-card" headerBorder={false}>
@@ -209,7 +235,9 @@
                         </div>
 
                         <ul class="simple-list">
-                            {#each [...skillAnalysis.skills].sort((a, b) => b.points - a.points).slice(0, 8) as skill (skill.key)}
+                            {#each [...skillAnalysis.skills]
+                                .sort((a, b) => b.points - a.points)
+                                .slice(0, 8) as skill (skill.key)}
                                 <li>
                                     <span>{formatSkillLabel(skill.key)}</span>
                                     <strong>{skill.points}</strong>
@@ -225,19 +253,36 @@
                     <div class="kpi-list">
                         <div>
                             <span>Battles Participated</span>
-                            <strong>{data.user.battleParticipation.battlesParticipated}</strong>
+                            <strong
+                                >{data.user.battleParticipation
+                                    .battlesParticipated}</strong
+                            >
                         </div>
                         <div>
                             <span>Negative Damage</span>
-                            <strong>{formatCompactNumber(data.user.battleParticipation.negativeDamage)}</strong>
+                            <strong
+                                >{formatCompactNumber(
+                                    data.user.battleParticipation
+                                        .negativeDamage,
+                                )}</strong
+                            >
                         </div>
                         <div>
                             <span>Own Country Participation</span>
-                            <strong>{data.user.battleParticipation.ownCountryParticipated}/{data.user.battleParticipation.ownCountryBattles}</strong>
+                            <strong
+                                >{data.user.battleParticipation
+                                    .ownCountryParticipated}/{data.user
+                                    .battleParticipation
+                                    .ownCountryBattles}</strong
+                            >
                         </div>
                         <div>
                             <span>MU Order Participation</span>
-                            <strong>{data.user.battleParticipation.muOrderParticipated}/{data.user.battleParticipation.muOrderBattles}</strong>
+                            <strong
+                                >{data.user.battleParticipation
+                                    .muOrderParticipated}/{data.user
+                                    .battleParticipation.muOrderBattles}</strong
+                            >
                         </div>
                         <div>
                             <span>Cost Per 1 Damage</span>
@@ -251,7 +296,11 @@
                         </div>
                         <div>
                             <span>Last Updated</span>
-                            <strong>{formatDate(data.user.battleParticipation.updatedAt)}</strong>
+                            <strong
+                                >{formatDate(
+                                    data.user.battleParticipation.updatedAt,
+                                )}</strong
+                            >
                         </div>
                     </div>
                 </Card>
@@ -266,8 +315,10 @@
                             {#each recentBattles as battle (battle.id)}
                                 <li>
                                     <span>
-                                        {battle.attackerCountry?.code ?? "?"} vs {battle.defenderCountry?.code ?? "?"}
-                                        in {battle.defenderRegion?.name ?? "Unknown"}
+                                        {battle.attackerCountry?.code ?? "?"} vs {battle
+                                            .defenderCountry?.code ?? "?"}
+                                        in {battle.defenderRegion?.name ??
+                                            "Unknown"}
                                     </span>
                                 </li>
                             {/each}
@@ -296,7 +347,9 @@
                     <div class="kpi-list compact">
                         <div>
                             <span>Perfect Items</span>
-                            <strong>{data.user.perfectItems?.length ?? 0}</strong>
+                            <strong
+                                >{data.user.perfectItems?.length ?? 0}</strong
+                            >
                         </div>
                         <div>
                             <span>Used Items</span>
@@ -304,7 +357,9 @@
                         </div>
                         <div>
                             <span>Owned Companies</span>
-                            <strong>{data.user.ownedCompanies?.length ?? 0}</strong>
+                            <strong
+                                >{data.user.ownedCompanies?.length ?? 0}</strong
+                            >
                         </div>
                     </div>
                 </Card>
@@ -317,7 +372,12 @@
                         </div>
                         <div>
                             <span>Total Profit</span>
-                            <strong>{formatMoney(data.user.flipState.totalProfit, 2)}</strong>
+                            <strong
+                                >{formatMoney(
+                                    data.user.flipState.totalProfit,
+                                    2,
+                                )}</strong
+                            >
                         </div>
                         <div>
                             <span>Recent Events</span>
@@ -338,7 +398,10 @@
                         </div>
                         <div>
                             <span>Cancelled</span>
-                            <strong>{(data.user.tradeOffers?.length ?? 0) - activeOffers.length}</strong>
+                            <strong
+                                >{(data.user.tradeOffers?.length ?? 0) -
+                                    activeOffers.length}</strong
+                            >
                         </div>
                     </div>
                 </Card>
@@ -372,7 +435,10 @@
                         {#each data.user.countryHistory ?? [] as entry (entry.at)}
                             <li>
                                 <span>{formatDate(entry.at)}</span>
-                                <strong>{entry.country.name} ({entry.country.code})</strong>
+                                <strong
+                                    >{entry.country.name} ({entry.country
+                                        .code})</strong
+                                >
                             </li>
                         {/each}
                     </ul>
@@ -409,7 +475,9 @@
                             <li>
                                 <span>{formatDate(snapshot.since)}</span>
                                 <strong>
-                                    E:{snapshot.set.energy} A:{snapshot.set.attack} P:{snapshot.set.production} M:{snapshot.set.management}
+                                    E:{snapshot.set.energy} A:{snapshot.set
+                                        .attack} P:{snapshot.set.production} M:{snapshot
+                                        .set.management}
                                 </strong>
                             </li>
                         {/each}
@@ -428,21 +496,86 @@
                                     <span>{formatDate(report.dayStart)}</span>
                                     <strong>
                                         Net {formatMoney(
-                                            report.wagesEarned + report.itemsSold + report.equipSold - report.wagesPaid - report.itemsBought - report.equipBought,
+                                            report.wagesEarned +
+                                                report.itemsSold +
+                                                report.equipSold -
+                                                report.wagesPaid -
+                                                report.itemsBought -
+                                                report.equipBought,
                                             2,
                                         )}
                                     </strong>
                                 </summary>
                                 <div class="report-body">
-                                    <div><span>Wages Earned</span><strong>{formatMoney(report.wagesEarned, 2)}</strong></div>
-                                    <div><span>Wages Paid</span><strong>{formatMoney(report.wagesPaid, 2)}</strong></div>
-                                    <div><span>Items Bought</span><strong>{formatMoney(report.itemsBought, 2)}</strong></div>
-                                    <div><span>Items Sold</span><strong>{formatMoney(report.itemsSold, 2)}</strong></div>
-                                    <div><span>Equip Bought</span><strong>{formatMoney(report.equipBought, 2)}</strong></div>
-                                    <div><span>Equip Sold</span><strong>{formatMoney(report.equipSold, 2)}</strong></div>
-                                    <div><span>Dismantled</span><strong>{formatMoney(report.valueDismantled, 2)}</strong></div>
-                                    <div><span>Cases Opened</span><strong>{report.casesOpened}</strong></div>
-                                    <div><span>Cases Net</span><strong>{formatMoney(report.casesNet, 2)}</strong></div>
+                                    <div>
+                                        <span>Wages Earned</span><strong
+                                            >{formatMoney(
+                                                report.wagesEarned,
+                                                2,
+                                            )}</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        <span>Wages Paid</span><strong
+                                            >{formatMoney(
+                                                report.wagesPaid,
+                                                2,
+                                            )}</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        <span>Items Bought</span><strong
+                                            >{formatMoney(
+                                                report.itemsBought,
+                                                2,
+                                            )}</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        <span>Items Sold</span><strong
+                                            >{formatMoney(
+                                                report.itemsSold,
+                                                2,
+                                            )}</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        <span>Equip Bought</span><strong
+                                            >{formatMoney(
+                                                report.equipBought,
+                                                2,
+                                            )}</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        <span>Equip Sold</span><strong
+                                            >{formatMoney(
+                                                report.equipSold,
+                                                2,
+                                            )}</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        <span>Dismantled</span><strong
+                                            >{formatMoney(
+                                                report.valueDismantled,
+                                                2,
+                                            )}</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        <span>Cases Opened</span><strong
+                                            >{report.casesOpened}</strong
+                                        >
+                                    </div>
+                                    <div>
+                                        <span>Cases Net</span><strong
+                                            >{formatMoney(
+                                                report.casesNet,
+                                                2,
+                                            )}</strong
+                                        >
+                                    </div>
                                 </div>
                             </details>
                         {/each}

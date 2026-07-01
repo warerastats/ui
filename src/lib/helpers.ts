@@ -409,7 +409,11 @@ export const calculateSkillPointsSpent = (
 ): SkillAnalysis => {
     let pointsEco = 0;
     let pointsWar = 0;
-    const skillDetails: Array<{ key: string; points: number; category: SkillCategory }> = [];
+    const skillDetails: Array<{
+        key: string;
+        points: number;
+        category: SkillCategory;
+    }> = [];
 
     for (const skill of skills) {
         const points = getCumulativeSkillPoints(skill.value);
@@ -429,7 +433,8 @@ export const calculateSkillPointsSpent = (
     let category: SkillCategory = "hybrid";
 
     if (pointsTotal > 0) {
-        const ratio = pointsWar === 0 ? Number.POSITIVE_INFINITY : pointsEco / pointsWar;
+        const ratio =
+            pointsWar === 0 ? Number.POSITIVE_INFINITY : pointsEco / pointsWar;
         if (ratio > 1.5) {
             category = "eco";
         } else if (ratio < 0.667) {
@@ -471,7 +476,9 @@ export type EquipmentAggregate = {
 
 export const aggregateEquipmentUsed = (
     battles: Array<{
-        damageReports: Array<{ equipment: Array<{ itemCode: string; count: number }> }>;
+        damageReports: Array<{
+            equipment: Array<{ itemCode: string; count: number }>;
+        }>;
     }>,
 ): EquipmentAggregate[] => {
     const equipmentMap = new Map<string, { count: number }>();
@@ -479,7 +486,9 @@ export const aggregateEquipmentUsed = (
     for (const battle of battles) {
         for (const report of battle.damageReports) {
             for (const equipment of report.equipment) {
-                const existing = equipmentMap.get(equipment.itemCode) || { count: 0 };
+                const existing = equipmentMap.get(equipment.itemCode) || {
+                    count: 0,
+                };
                 equipmentMap.set(equipment.itemCode, {
                     count: existing.count + equipment.count,
                 });

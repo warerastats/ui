@@ -34,7 +34,11 @@
         padding: 24px;
         background:
             linear-gradient(rgba(20, 20, 20, 0.6), rgba(20, 20, 20, 0.72)),
-            radial-gradient(circle at top, rgba(80, 80, 80, 0.2), transparent 45%);
+            radial-gradient(
+                circle at top,
+                rgba(80, 80, 80, 0.2),
+                transparent 45%
+            );
         backdrop-filter: blur(6px);
     }
 
@@ -78,4 +82,4 @@
             transform: rotate(360deg);
         }
     }
- </style>
+</style>
