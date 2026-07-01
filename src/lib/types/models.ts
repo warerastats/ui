@@ -4,6 +4,11 @@ export type CountrySummary = {
     code: string;
 };
 
+export type FloatEntry = {
+    key: string;
+    value: number;
+};
+
 export type BattleSummary = {
     id: string;
     winnerSide: string | null;
@@ -566,6 +571,7 @@ export type UserBattle = {
         name: string;
         code: string;
     } | null;
+    damageReports: DamageReport[];
 };
 
 export type UserItem = {
@@ -701,6 +707,7 @@ export type User = {
     level: number;
     militaryRank: number;
     avatarUrl: string;
+    wealth: FloatEntry[];
     skills: UserSkill[];
     country: UserCountry | null;
     party: UserParty | null;

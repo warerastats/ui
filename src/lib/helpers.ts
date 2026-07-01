@@ -376,3 +376,137 @@ export const buildBattleSideReportSummary = (
         maxTimelineDamage,
     };
 };
+
+// User skill helpers
+export type SkillCategory = "eco" | "war" | "hybrid";
+
+export type SkillAnalysis = {
+    pointsEco: number;
+    pointsWar: number;
+    pointsTotal: number;
+    category: SkillCategory;
+    skills: Array<{ key: string; points: number; category: SkillCategory }>;
+};
+
+const ECONOMIC_SKILLS = new Set([
+    "entrepreneurship",
+    "energy",
+    "production",
+    "companies",
+    "management",
+]);
+
+const getCumulativeSkillPoints = (level: number): number => {
+    if (level <= 0) {
+        return 0;
+    }
+
+    return (level * (level + 1)) / 2;
+};
+
+export const calculateSkillPointsSpent = (
+    skills: Array<{ key: string; value: number }>,
+): SkillAnalysis => {
+    let pointsEco = 0;
+    let pointsWar = 0;
+    const skillDetails: Array<{ key: string; points: number; category: SkillCategory }> = [];
+
+    for (const skill of skills) {
+        const points = getCumulativeSkillPoints(skill.value);
+        const isEco = ECONOMIC_SKILLS.has(skill.key);
+        const category: SkillCategory = isEco ? "eco" : "war";
+
+        if (isEco) {
+            pointsEco += points;
+        } else {
+            pointsWar += points;
+        }
+
+        skillDetails.push({ key: skill.key, points, category });
+    }
+
+    const pointsTotal = pointsEco + pointsWar;
+    let category: SkillCategory = "hybrid";
+
+    if (pointsTotal > 0) {
+        const ratio = pointsWar === 0 ? Number.POSITIVE_INFINITY : pointsEco / pointsWar;
+        if (ratio > 1.5) {
+            category = "eco";
+        } else if (ratio < 0.667) {
+            category = "war";
+        }
+    }
+
+    return {
+        pointsEco,
+        pointsWar,
+        pointsTotal,
+        category,
+        skills: skillDetails,
+    };
+};
+
+export const calculateCostPerDamage = (
+    wealth: Array<{ key: string; value: number }> | null,
+    totalDamage: number,
+): number | null => {
+    if (!wealth || wealth.length === 0 || totalDamage <= 0) {
+        return null;
+    }
+
+    const totalWealth = wealth.reduce((sum, w) => sum + w.value, 0);
+    if (totalWealth <= 0) {
+        return null;
+    }
+
+    return totalWealth / totalDamage;
+};
+
+export type EquipmentAggregate = {
+    itemCode: string;
+    itemName: string;
+    totalCount: number;
+    totalValue: number;
+};
+
+export const aggregateEquipmentUsed = (
+    battles: Array<{
+        damageReports: Array<{ equipment: Array<{ itemCode: string; count: number }> }>;
+    }>,
+): EquipmentAggregate[] => {
+    const equipmentMap = new Map<string, { count: number }>();
+
+    for (const battle of battles) {
+        for (const report of battle.damageReports) {
+            for (const equipment of report.equipment) {
+                const existing = equipmentMap.get(equipment.itemCode) || { count: 0 };
+                equipmentMap.set(equipment.itemCode, {
+                    count: existing.count + equipment.count,
+                });
+            }
+        }
+    }
+
+    return Array.from(equipmentMap.entries())
+        .map(([itemCode, data]) => ({
+            itemCode,
+            itemName: getItemName(itemCode),
+            totalCount: data.count,
+            totalValue: 0, // Value would need market data to calculate
+        }))
+        .sort((a, b) => b.totalCount - a.totalCount);
+};
+
+export const calculateFlipROI = (
+    totalProfit: number,
+    totalFlips: number,
+): number | null => {
+    if (totalFlips === 0 || totalProfit === 0) {
+        return null;
+    }
+
+    // Rough estimate: assume average initial investment per flip
+    // ROI = profit / (number of flips * estimated cost per flip)
+    // Since we don't have investment data, just return profit per flip
+    return totalProfit / totalFlips;
+};

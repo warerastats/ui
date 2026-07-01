@@ -22,16 +22,15 @@ function getLast7CompletedDaysWindow() {
 const USER_QUERY = `
 	query UserDetailData($id: ID!, $from: DateTime!, $to: DateTime!) {
 		user(id: $id) {
-			id
 			username
 			level
 			militaryRank
 			avatarUrl
 
-			skills {
-				key
-				value
-			}
+			wealth {
+              key
+              value
+            }
 
 			country {
 				id
@@ -166,6 +165,17 @@ const USER_QUERY = `
 					name
 					code
 				}
+
+                damageReports(
+                  entityKind: USER
+                  entityIds: [$id]
+                ) {
+                  damage
+                  equipment {
+                    itemCode
+                    count
+                  }
+                }
 			}
 
 			perfectItems: items(status: PERFECT) {
