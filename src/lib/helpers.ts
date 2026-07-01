@@ -46,6 +46,17 @@ export const MARKET_ITEM_CODES = [
     "petroleum",
 ] as const;
 
+export const EQUIPMENT_GROUPS = {
+    Weapons: ["knife", "gun", "rifle", "sniper", "tank", "jet"],
+    Boots: ["boots1", "boots2", "boots3", "boots4", "boots5", "boots6"],
+    Helmets: ["helmet1", "helmet2", "helmet3", "helmet4", "helmet5", "helmet6"],
+    Gloves: ["gloves1", "gloves2", "gloves3", "gloves4", "gloves5", "gloves6"],
+    Chestplates: ["chest1", "chest2", "chest3", "chest4", "chest5", "chest6"],
+    Pants: ["pants1", "pants2", "pants3", "pants4", "pants5", "pants6"],
+} as const;
+
+export const EQUIPMENT_ITEM_CODES = Object.values(EQUIPMENT_GROUPS).flat();
+
 export const ITEM_NAMES: Record<string, string> = {
     case1: "Case",
     case2: "Elite Case",

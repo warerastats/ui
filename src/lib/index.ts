@@ -116,4 +116,9 @@ export type {
     SearchResponse,
     SearchResultItem,
     TradeTransactionEdge,
+    EquipmentWindowPrice,
+    EquipmentPricingItem,
+    EquipmentPageLoadData,
+    EquipmentPageLoadFailure,
+    EquipmentPageLoadSuccess,
 } from "./types";

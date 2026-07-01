@@ -3,6 +3,7 @@
 
     <nav aria-label="Main navigation">
         <a href="/items">Items</a>
+        <a href="/equipment">Equipment</a>
     </nav>
 </div>
 

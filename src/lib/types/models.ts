@@ -129,6 +129,16 @@ export type ItemHourlySeries = {
     hourlyAvgPrices: number[];
 };
 
+export type EquipmentWindowPrice = {
+    weightedAvg: number;
+    count: number;
+};
+
+export type EquipmentPricingItem = {
+    itemCode: string;
+    window: EquipmentWindowPrice | null;
+};
+
 export type ItemOrderbookLevel = {
     price: number;
     quantity: number;

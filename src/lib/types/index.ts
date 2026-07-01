@@ -72,6 +72,8 @@ export type {
     UserWageHistoryEntry,
     SearchResultItem,
     TradeTransactionEdge,
+    EquipmentWindowPrice,
+    EquipmentPricingItem,
 } from "./models";
 
 export type {
@@ -117,4 +119,7 @@ export type {
     UserQueryResult,
     SearchApiResponse,
     SearchResponse,
+    EquipmentPageLoadData,
+    EquipmentPageLoadFailure,
+    EquipmentPageLoadSuccess,
 } from "./responses";

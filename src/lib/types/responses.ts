@@ -228,3 +228,18 @@ export type RegionPageLoadFailure = {
 };
 
 export type RegionPageLoadData = RegionPageLoadSuccess | RegionPageLoadFailure;
+
+export type EquipmentPageLoadSuccess = {
+    ok: true;
+    items: import("./models").EquipmentPricingItem[];
+};
+
+export type EquipmentPageLoadFailure = {
+    ok: false;
+    error: string;
+    items: import("./models").EquipmentPricingItem[];
+};
+
+export type EquipmentPageLoadData =
+    | EquipmentPageLoadSuccess
+    | EquipmentPageLoadFailure;
