@@ -16,6 +16,7 @@ export type {
     CountrySummary,
     DamageReport,
     DamageReportEquipment,
+    FloatEntry,
     InflationPoint,
     ItemCandle,
     ItemEffectivePrice,
@@ -74,6 +75,9 @@ export type {
     TradeTransactionEdge,
     EquipmentWindowPrice,
     EquipmentPricingItem,
+    EquipmentSkillPrice,
+    EquipmentDetailPricing,
+    EquipmentMarketTransaction,
 } from "./models";
 
 export type {
@@ -122,4 +126,7 @@ export type {
     EquipmentPageLoadData,
     EquipmentPageLoadFailure,
     EquipmentPageLoadSuccess,
+    EquipmentDetailPageLoadData,
+    EquipmentDetailPageLoadFailure,
+    EquipmentDetailPageLoadSuccess,
 } from "./responses";

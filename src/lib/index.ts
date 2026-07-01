@@ -27,6 +27,7 @@ export type {
     DamageReport,
     DamageReportEquipment,
     DamageReportsApiResponse,
+    FloatEntry,
     IndexPageLoadData,
     IndexPageLoadFailure,
     IndexPageLoadSuccess,
@@ -121,4 +122,10 @@ export type {
     EquipmentPageLoadData,
     EquipmentPageLoadFailure,
     EquipmentPageLoadSuccess,
+    EquipmentSkillPrice,
+    EquipmentDetailPricing,
+    EquipmentMarketTransaction,
+    EquipmentDetailPageLoadData,
+    EquipmentDetailPageLoadFailure,
+    EquipmentDetailPageLoadSuccess,
 } from "./types";

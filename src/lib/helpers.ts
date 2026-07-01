@@ -57,6 +57,31 @@ export const EQUIPMENT_GROUPS = {
 
 export const EQUIPMENT_ITEM_CODES = Object.values(EQUIPMENT_GROUPS).flat();
 
+const EQUIPMENT_14D_CODES = new Set([
+    "knife",
+    "gun",
+    "rifle",
+    "boots1",
+    "boots2",
+    "boots3",
+    "helmet1",
+    "helmet2",
+    "helmet3",
+    "gloves1",
+    "gloves2",
+    "gloves3",
+    "chest1",
+    "chest2",
+    "chest3",
+    "pants1",
+    "pants2",
+    "pants3",
+]);
+
+export const getEquipmentWindowDays = (itemCode: string): number => {
+    return EQUIPMENT_14D_CODES.has(itemCode) ? 14 : 30;
+};
+
 export const ITEM_NAMES: Record<string, string> = {
     case1: "Case",
     case2: "Elite Case",

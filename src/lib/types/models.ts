@@ -139,6 +139,37 @@ export type EquipmentPricingItem = {
     window: EquipmentWindowPrice | null;
 };
 
+export type EquipmentSkillPrice = {
+    skills: FloatEntry[];
+    min: number;
+    max: number;
+    avg: number;
+    volume: number;
+};
+
+export type EquipmentDetailPricing = {
+    window: EquipmentWindowPrice | null;
+    skills: EquipmentSkillPrice[];
+};
+
+export type EquipmentMarketTransaction = {
+    money: number;
+    seller: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+    buyer: {
+        id: string;
+        username: string;
+        avatarUrl: string;
+    };
+    item: {
+        id: string;
+        skills: FloatEntry[];
+    };
+};
+
 export type ItemOrderbookLevel = {
     price: number;
     quantity: number;

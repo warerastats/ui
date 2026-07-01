@@ -243,3 +243,24 @@ export type EquipmentPageLoadFailure = {
 export type EquipmentPageLoadData =
     | EquipmentPageLoadSuccess
     | EquipmentPageLoadFailure;
+
+export type EquipmentDetailPageLoadSuccess = {
+    ok: true;
+    itemCode: string;
+    windowDays: number;
+    pricing: import("./models").EquipmentDetailPricing;
+    transactions: import("./models").EquipmentMarketTransaction[];
+};
+
+export type EquipmentDetailPageLoadFailure = {
+    ok: false;
+    itemCode: string;
+    windowDays: number;
+    error: string;
+    pricing: null;
+    transactions: import("./models").EquipmentMarketTransaction[];
+};
+
+export type EquipmentDetailPageLoadData =
+    | EquipmentDetailPageLoadSuccess
+    | EquipmentDetailPageLoadFailure;
