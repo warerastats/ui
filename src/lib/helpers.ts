@@ -8,16 +8,18 @@ export const formatMoney = (amount: number, decimals = 4): string => {
 };
 
 export const formatCompactNumber = (value: number): string => {
-    if (value >= 1_000_000_000) {
-        return (value / 1_000_000_000).toFixed(1) + "B";
+    const abs = Math.abs(value);
+    const sign = value < 0 ? "-" : "";
+    if (abs >= 1_000_000_000) {
+        return sign + (abs / 1_000_000_000).toFixed(1) + "B";
     }
-    if (value >= 1_000_000) {
-        return (value / 1_000_000).toFixed(1) + "M";
+    if (abs >= 1_000_000) {
+        return sign + (abs / 1_000_000).toFixed(1) + "M";
     }
-    if (value >= 1_000) {
-        return (value / 1_000).toFixed(1) + "K";
+    if (abs >= 1_000) {
+        return sign + (abs / 1_000).toFixed(1) + "K";
     }
-    return value.toString();
+    return value.toFixed(abs % 1 === 0 ? 0 : 1);
 };
 
 export const MARKET_ITEM_CODES = [
@@ -554,4 +556,42 @@ export const calculateFlipROI = (
     // ROI = profit / (number of flips * estimated cost per flip)
     // Since we don't have investment data, just return profit per flip
     return totalProfit / totalFlips;
+};
+
+export const ETHICS_LABELS: Record<string, string[]> = {
+    militarism: [
+        "Fanatic Pacifist",
+        "Pacifist",
+        "Unethical",
+        "Expansionist",
+        "Fanatic Expansionist",
+    ],
+    isolationism: [
+        "Fanatic Diplomatic",
+        "Diplomatic",
+        "Unethical",
+        "Isolationist",
+        "Fanatic Isolationist",
+    ],
+    imperialism: [
+        "Fanatic Republican",
+        "Republican",
+        "Unethical",
+        "Imperialist",
+        "Fanatic Imperialist",
+    ],
+    industrialism: [
+        "Fanatic Agrarian",
+        "Agrarian",
+        "Unethical",
+        "Industrialist",
+        "Fanatic Industrialist",
+    ],
+};
+
+export const getEthicsLabel = (axis: string, value: number): string => {
+    const labels = ETHICS_LABELS[axis];
+    if (!labels) return `${value}`;
+    const idx = value + 2;
+    return labels[idx] ?? `${value}`;
 };

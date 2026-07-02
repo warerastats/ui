@@ -264,3 +264,26 @@ export type EquipmentDetailPageLoadFailure = {
 export type EquipmentDetailPageLoadData =
     | EquipmentDetailPageLoadSuccess
     | EquipmentDetailPageLoadFailure;
+
+export type CountryQueryResult = {
+    country: import("./models").Country | null;
+};
+
+export type CountryPageLoadSuccess = {
+    ok: true;
+    id: string;
+    country: import("./models").Country;
+    currentPrices: Record<string, number>;
+};
+
+export type CountryPageLoadFailure = {
+    ok: false;
+    id: string;
+    error: string;
+    country: null;
+    currentPrices: Record<string, number>;
+};
+
+export type CountryPageLoadData =
+    | CountryPageLoadSuccess
+    | CountryPageLoadFailure;

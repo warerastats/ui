@@ -771,6 +771,197 @@ export type User = {
     battleParticipation: BattleParticipation;
 };
 
+// Country page types
+
+export type CountryEthics = {
+    unethical: boolean;
+    militarism: number;
+    isolationism: number;
+    imperialism: number;
+    industrialism: number;
+};
+
+export type CountryTaxes = {
+    income: number;
+    market: number;
+    selfWork: number;
+};
+
+export type CountryRulingPartyRef = {
+    id: string;
+    name: string;
+    avatarUrl: string;
+    ethics: CountryEthics;
+};
+
+export type CountryRulingPartyHistoryEntry = {
+    at: string;
+    party: {
+        id: string;
+        name: string;
+        avatarUrl: string;
+    };
+};
+
+export type CountryAllianceRef = {
+    name: string;
+    countries: CountryAllianceMember[];
+};
+
+export type CountryAllianceMember = {
+    id: string;
+    code: string;
+    name: string;
+    userCount: number;
+};
+
+export type CountryWealthReport = {
+    dayStart: string;
+    memberCount: number;
+    totalDamage: number;
+    totalWealth: number;
+    wagesPaid: number;
+    wagesEarned: number;
+};
+
+export type CountryMoneyFlowCounterpart = {
+    country: CountrySummary;
+    inEquipment: number;
+    outEquipment: number;
+    inItems: number;
+    outItems: number;
+    inWages: number;
+    outWages: number;
+};
+
+export type CountryMoneyFlowReport = {
+    dayStart: string;
+    inEquipment: number;
+    outEquipment: number;
+    inEquipmentDomestic: number;
+    outEquipmentDomestic: number;
+    inEquipmentCrossBorder: number;
+    outEquipmentCrossBorder: number;
+    inItems: number;
+    outItems: number;
+    inItemsDomestic: number;
+    outItemsDomestic: number;
+    inItemsCrossBorder: number;
+    outItemsCrossBorder: number;
+    inWages: number;
+    outWages: number;
+    inWagesDomestic: number;
+    outWagesDomestic: number;
+    inWagesCrossBorder: number;
+    outWagesCrossBorder: number;
+    counterparts: CountryMoneyFlowCounterpart[];
+};
+
+export type CountryTaxSource = {
+    total: number;
+    hijacked: number;
+    foreignTaxRedirected: number;
+    country: CountrySummary;
+};
+
+export type CountryTaxHijack = {
+    amount: number;
+    country: CountrySummary;
+};
+
+export type CountryForeignTaxRecipient = {
+    amount: number;
+    country: CountrySummary;
+};
+
+export type CountryTaxFlow = {
+    hourStart: string;
+    totalTax: number;
+    coreEarned: number;
+    nonCoreEarned: number;
+    foreignTaxIn: number;
+    foreignTaxOut: number;
+    hijackedIn: number;
+    hijackedOut: number;
+    sources: CountryTaxSource[];
+    hijackers: CountryTaxHijack[];
+    foreignTaxRecipients: CountryForeignTaxRecipient[];
+};
+
+export type CountryFlipState = {
+    profitable: number;
+    totalProfit: number;
+    totalTrades: number;
+    updatedAt: string;
+};
+
+export type CountryInventoryLot = {
+    boughtAt: string;
+    quantity: number;
+    unitPrice: number;
+};
+
+export type CountryInventoryLotGroup = {
+    itemCode: string;
+    lots: CountryInventoryLot[];
+};
+
+export type CountryInventory = {
+    lots: CountryInventoryLotGroup[];
+    updatedAt: string;
+};
+
+export type CountryFlipEvent = {
+    at: string;
+    itemCode: string;
+    quantity: number;
+    buyCost: number;
+    sellRevenue: number;
+    profit: number;
+};
+
+export type CountryOrderChangeBattle = {
+    id: string;
+    isActive: boolean;
+    defenderRegion: { name: string } | null;
+    attackerCountry: CountrySummary | null;
+    defenderCountry: CountrySummary | null;
+    damageReports: CountryDamageReport[];
+};
+
+export type CountryDamageReport = {
+    intervalStart: string;
+    side: string;
+    damage: number;
+};
+
+export type CountryOrderChange = {
+    at: string;
+    side: string;
+    kind: string;
+    action: string;
+    battle: CountryOrderChangeBattle;
+};
+
+export type Country = {
+    name: string;
+    code: string;
+    userCount: number;
+    money: number;
+    specialisation: string | null;
+    taxes: CountryTaxes;
+    rulingParty: CountryRulingPartyRef | null;
+    rulingPartyHistory: CountryRulingPartyHistoryEntry[];
+    alliance: CountryAllianceRef | null;
+    wealthReports: CountryWealthReport[];
+    moneyFlows: CountryMoneyFlowReport[];
+    taxFlows: CountryTaxFlow[];
+    flipState: CountryFlipState | null;
+    inventory: CountryInventory | null;
+    flipEvents: CountryFlipEvent[];
+    orderChanges: CountryOrderChange[];
+};
+
 export type RegionCountry = {
     id: string;
     name: string;
