@@ -7,6 +7,7 @@
         calculateCostPerDamage,
         calculateFlipROI,
         calculateSkillPointsSpent,
+        snapshotSetToSkillArray,
         formatCompactNumber,
         formatMoney,
     } from "$lib/helpers";
@@ -32,31 +33,9 @@
 
     let skillAnalysis = $derived.by(() => {
         if (!latestSkillSnapshot) return null;
-        return calculateSkillPointsSpent([
-            { key: "energy", value: latestSkillSnapshot.set.energy },
-            { key: "health", value: latestSkillSnapshot.set.health },
-            { key: "hunger", value: latestSkillSnapshot.set.hunger },
-            { key: "attack", value: latestSkillSnapshot.set.attack },
-            { key: "companies", value: latestSkillSnapshot.set.companies },
-            {
-                key: "entrepreneurship",
-                value: latestSkillSnapshot.set.entrepreneurship,
-            },
-            { key: "production", value: latestSkillSnapshot.set.production },
-            {
-                key: "criticalChance",
-                value: latestSkillSnapshot.set.criticalChance,
-            },
-            {
-                key: "criticalDamages",
-                value: latestSkillSnapshot.set.criticalDamages,
-            },
-            { key: "armor", value: latestSkillSnapshot.set.armor },
-            { key: "precision", value: latestSkillSnapshot.set.precision },
-            { key: "dodge", value: latestSkillSnapshot.set.dodge },
-            { key: "lootChance", value: latestSkillSnapshot.set.lootChance },
-            { key: "management", value: latestSkillSnapshot.set.management },
-        ]);
+        return calculateSkillPointsSpent(
+            snapshotSetToSkillArray(latestSkillSnapshot.set),
+        );
     });
 
     let wealthTotal = $derived.by(() => {

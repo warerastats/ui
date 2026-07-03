@@ -1,6 +1,11 @@
 import type { PageServerLoad } from "./$types";
 import type { CountryPageLoadData, CountryQueryResult } from "$lib";
 import { runGraphQL } from "$lib/server/graphql/client";
+import {
+    summarizePopulationModes,
+    estimateCountryDamageCapacity,
+    type CountryUserSnapshot,
+} from "$lib/helpers";
 
 function getWindow(days: number) {
     const today = new Date();
@@ -199,6 +204,31 @@ const COUNTRY_QUERY = `
                     }
                 }
             }
+
+            users(first: 999999) {
+                id
+                level
+                militaryRank
+                skillSnapshots(first: 10) {
+                    since
+                    set {
+                        energy
+                        health
+                        hunger
+                        attack
+                        companies
+                        entrepreneurship
+                        production
+                        criticalChance
+                        criticalDamages
+                        armor
+                        precision
+                        dodge
+                        lootChance
+                        management
+                    }
+                }
+            }
         }
     }
 `;
@@ -227,6 +257,8 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
                 error: result.errors[0]?.message || "Unknown server error",
                 country: null,
                 currentPrices: {},
+                population: null,
+                damageEstimate: null,
             } satisfies CountryPageLoadData;
         }
 
@@ -239,8 +271,71 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
                 error: "No country data returned",
                 country: null,
                 currentPrices: {},
+                population: null,
+                damageEstimate: null,
             } satisfies CountryPageLoadData;
         }
+
+        // Phase 1.5: Paginate through all users to collect skill data
+        const allUsers: any[] = [...((country as any).users ?? [])];
+        let lastUserId =
+            allUsers.length > 0 ? allUsers[allUsers.length - 1]?.id : null;
+
+        // Keep fetching if we got a full page (API caps at ~200)
+        while (lastUserId && allUsers.length % 200 === 0) {
+            const pageResult = await runGraphQL<{
+                country: { users: any[] } | null;
+            }>(
+                fetch,
+                `query CountryUsersPage($id: ID!, $after: ID!) {
+                    country(id: $id) {
+                        users(first: 200, after: $after) {
+                            id
+                            level
+                            militaryRank
+                            skillSnapshots(first: 10) {
+                                since
+                                set {
+                                    energy health hunger attack companies
+                                    entrepreneurship production criticalChance
+                                    criticalDamages armor precision dodge
+                                    lootChance management
+                                }
+                            }
+                        }
+                    }
+                }`,
+                { id, after: lastUserId },
+            );
+
+            const pageUsers = pageResult.data?.country?.users ?? [];
+            if (pageUsers.length === 0) break;
+            allUsers.push(...pageUsers);
+            lastUserId = pageUsers[pageUsers.length - 1]?.id;
+        }
+
+        // Aggregate user skill data (server-side only, don't ship raw array)
+        const qualifiedUsers: CountryUserSnapshot[] = [];
+        for (const user of allUsers) {
+            const level = user.level ?? 0;
+            if (level < 10) continue;
+            const snapshots = user.skillSnapshots ?? [];
+            if (snapshots.length === 0) continue;
+            qualifiedUsers.push({
+                level,
+                militaryRank: user.militaryRank ?? 0,
+                skillSnapshots: snapshots.map((s: any) => ({
+                    since: s.since,
+                    set: s.set,
+                })),
+            });
+        }
+
+        const population = summarizePopulationModes(qualifiedUsers);
+        const damageEstimate = estimateCountryDamageCapacity(
+            qualifiedUsers,
+            country.wealthReports ?? [],
+        );
 
         // Phase 2: Fetch current market prices for inventory items
         let currentPrices: Record<string, number> = {};
@@ -280,6 +375,8 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
             id,
             country,
             currentPrices,
+            population,
+            damageEstimate,
         } satisfies CountryPageLoadData;
     } catch (error) {
         return {
@@ -289,6 +386,8 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
                 error instanceof Error ? error.message : "Unknown server error",
             country: null,
             currentPrices: {},
+            population: null,
+            damageEstimate: null,
         } satisfies CountryPageLoadData;
     }
 };

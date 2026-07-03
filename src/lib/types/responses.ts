@@ -15,6 +15,7 @@ import type {
     SearchResultItem,
     TradeTransactionEdge,
 } from "./models";
+import type { PopulationSummary, DamageEstimate } from "$lib/helpers";
 
 export type IndexQueryResult = {
     latestMarketState: MarketState | null;
@@ -274,6 +275,8 @@ export type CountryPageLoadSuccess = {
     id: string;
     country: import("./models").Country;
     currentPrices: Record<string, number>;
+    population: PopulationSummary;
+    damageEstimate: DamageEstimate;
 };
 
 export type CountryPageLoadFailure = {
@@ -282,6 +285,8 @@ export type CountryPageLoadFailure = {
     error: string;
     country: null;
     currentPrices: Record<string, number>;
+    population: null;
+    damageEstimate: null;
 };
 
 export type CountryPageLoadData =

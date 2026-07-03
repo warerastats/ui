@@ -426,6 +426,25 @@ export type SkillAnalysis = {
     skills: Array<{ key: string; points: number; category: SkillCategory }>;
 };
 
+export const SKILL_KEYS = [
+    "energy",
+    "health",
+    "hunger",
+    "attack",
+    "companies",
+    "entrepreneurship",
+    "production",
+    "criticalChance",
+    "criticalDamages",
+    "armor",
+    "precision",
+    "dodge",
+    "lootChance",
+    "management",
+] as const;
+
+export type SkillSet = Record<(typeof SKILL_KEYS)[number], number>;
+
 const ECONOMIC_SKILLS = new Set([
     "entrepreneurship",
     "energy",
@@ -433,6 +452,198 @@ const ECONOMIC_SKILLS = new Set([
     "companies",
     "management",
 ]);
+
+/** Map a skill snapshot `set` object to the array format used by calculateSkillPointsSpent */
+export const snapshotSetToSkillArray = (
+    set: SkillSet,
+): Array<{ key: string; value: number }> => {
+    return SKILL_KEYS.map((key) => ({ key, value: set[key] ?? 0 }));
+};
+
+/** Sum of war-skill levels (not points) — direct damage proxy */
+export const getWarLevels = (set: SkillSet): number => {
+    let total = 0;
+    for (const key of SKILL_KEYS) {
+        if (!ECONOMIC_SKILLS.has(key)) {
+            total += set[key] ?? 0;
+        }
+    }
+    return total;
+};
+
+/**
+ * Convert total skill points to effective war levels using sqrt diminishing returns.
+ * Each skill level N costs N points (cumulative N*(N+1)/2), so levels ∝ sqrt(2*points).
+ * The constant factor cancels during calibration — only the shape matters.
+ */
+export const effWarLevels = (points: number): number => {
+    if (points <= 0) return 0;
+    return Math.sqrt(2 * points);
+};
+
+/** Tunable constant: reference military rank for weighting (relative, not absolute %) */
+const RANK_REF = 100;
+
+export type PopulationSummary = {
+    total: number;
+    war: number;
+    hybrid: number;
+    eco: number;
+    unknown: number;
+    warPct: number;
+    hybridPct: number;
+    ecoPct: number;
+    unknownPct: number;
+    avgWarShare: number;
+};
+
+export type DamageEstimate = {
+    observedAvg: number;
+    observedPeak: number;
+    currentCapacity: number;
+    potentialConservative: number;
+    potentialOptimistic: number;
+};
+
+export type CountryUserSnapshot = {
+    level: number;
+    militaryRank: number;
+    skillSnapshots: Array<{
+        since: string;
+        set: SkillSet;
+    }>;
+};
+
+/** Classify a population of users by war/hybrid/eco mode */
+export const summarizePopulationModes = (
+    users: CountryUserSnapshot[],
+): PopulationSummary => {
+    let war = 0;
+    let hybrid = 0;
+    let eco = 0;
+    let unknown = 0;
+    let totalWarShare = 0;
+    let classifiedCount = 0;
+
+    for (const user of users) {
+        const snapshot = user.skillSnapshots[0];
+        if (!snapshot) {
+            unknown++;
+            continue;
+        }
+
+        const analysis = calculateSkillPointsSpent(
+            snapshotSetToSkillArray(snapshot.set),
+        );
+
+        // Users who haven't allocated any skill points yet
+        if (analysis.pointsTotal === 0) {
+            unknown++;
+            continue;
+        }
+
+        if (analysis.category === "war") war++;
+        else if (analysis.category === "eco") eco++;
+        else hybrid++;
+
+        classifiedCount++;
+        totalWarShare += analysis.pointsWar / analysis.pointsTotal;
+    }
+
+    const total = war + hybrid + eco + unknown;
+    return {
+        total,
+        war,
+        hybrid,
+        eco,
+        unknown,
+        warPct: total > 0 ? (war / total) * 100 : 0,
+        hybridPct: total > 0 ? (hybrid / total) * 100 : 0,
+        ecoPct: total > 0 ? (eco / total) * 100 : 0,
+        unknownPct: total > 0 ? (unknown / total) * 100 : 0,
+        avgWarShare:
+            classifiedCount > 0 ? (totalWarShare / classifiedCount) * 100 : 0,
+    };
+};
+
+/**
+ * Estimate a country's damage capacity by combining historical damage with
+ * population war-mode distribution.
+ *
+ * Model:
+ *   currentWarShare = Σ(pointsWar × rankWeight) / Σ(pointsTotal × rankWeight)
+ *   damagePerUnit = observedAvg / currentWarShare
+ *   conservative = damagePerUnit × (currentWarShare + rank-weighted eco boost)
+ *   optimistic = damagePerUnit × 1.0  (everyone goes full war)
+ *
+ * Guarantees: optimistic >= conservative >= currentCapacity = observedAvg.
+ */
+export const estimateCountryDamageCapacity = (
+    users: CountryUserSnapshot[],
+    wealthReports: Array<{ dayStart: string; totalDamage: number }>,
+): DamageEstimate => {
+    let weightedWarPoints = 0;
+    let weightedTotalPoints = 0;
+
+    for (const user of users) {
+        const snapshot = user.skillSnapshots[0];
+        if (!snapshot) continue;
+        const analysis = calculateSkillPointsSpent(
+            snapshotSetToSkillArray(snapshot.set),
+        );
+        if (analysis.pointsTotal === 0) continue;
+        const rankWeight = 1 + user.militaryRank / RANK_REF;
+        weightedWarPoints += analysis.pointsWar * rankWeight;
+        weightedTotalPoints += analysis.pointsTotal * rankWeight;
+    }
+
+    const validReports = wealthReports.filter((r) => r.totalDamage > 0);
+    const totalDamage = validReports.reduce((s, r) => s + r.totalDamage, 0);
+    const observedAvg =
+        validReports.length > 0 ? totalDamage / validReports.length : 0;
+    const observedPeak = validReports.reduce(
+        (m, r) => Math.max(m, r.totalDamage),
+        0,
+    );
+
+    if (weightedTotalPoints === 0 || observedAvg === 0) {
+        return {
+            observedAvg,
+            observedPeak,
+            currentCapacity: observedAvg,
+            potentialConservative: observedAvg,
+            potentialOptimistic: observedAvg,
+        };
+    }
+
+    const currentWarShare = weightedWarPoints / weightedTotalPoints;
+    const damagePerUnit = observedAvg / currentWarShare;
+
+    // Conservative: eco players partially switch, weighted by their rank
+    let conservativeEcoBoost = 0;
+    for (const user of users) {
+        const snapshot = user.skillSnapshots[0];
+        if (!snapshot) continue;
+        const analysis = calculateSkillPointsSpent(
+            snapshotSetToSkillArray(snapshot.set),
+        );
+        if (analysis.pointsTotal === 0 || analysis.pointsEco === 0) continue;
+        const rankWeight = 1 + user.militaryRank / RANK_REF;
+        const switchProb = Math.min(1, user.militaryRank / RANK_REF);
+        conservativeEcoBoost += analysis.pointsEco * rankWeight * switchProb;
+    }
+
+    const conservativeWarShare =
+        (weightedWarPoints + conservativeEcoBoost) / weightedTotalPoints;
+
+    return {
+        observedAvg,
+        observedPeak,
+        currentCapacity: damagePerUnit * currentWarShare,
+        potentialConservative: damagePerUnit * conservativeWarShare,
+        potentialOptimistic: damagePerUnit * 1.0,
+    };
+};
 
 const getCumulativeSkillPoints = (level: number): number => {
     if (level <= 0) {

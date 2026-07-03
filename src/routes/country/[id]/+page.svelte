@@ -41,16 +41,10 @@
         const totalDamage = reports.reduce((sum, r) => sum + r.totalDamage, 0);
         const avgDaily = totalDamage / reports.length;
         const peakDaily = Math.max(...reports.map((r) => r.totalDamage));
-        const latestMembers = reports[reports.length - 1].memberCount || 1;
-        const damagePerCitizen = totalDamage / latestMembers;
-        const peakPerCapita = peakDaily / latestMembers;
-        const projected = peakPerCapita * data.country.userCount;
         return {
             totalDamage,
             avgDaily,
             peakDaily,
-            damagePerCitizen,
-            projected,
         };
     });
 
@@ -617,6 +611,86 @@
             {/if}
         </Card>
 
+        <!-- POPULATION WAR READINESS -->
+        {#if data.population && data.population.total > 0}
+            <Card title="Population Skills Allocation">
+                <div class="pop-bar-container">
+                    <div class="pop-bar">
+                        {#if data.population.warPct > 0}
+                            <div
+                                class="pop-seg war"
+                                style="width: {data.population.warPct}%"
+                            >
+                                {#if data.population.warPct >= 8}{Math.round(
+                                        data.population.warPct,
+                                    )}%{/if}
+                            </div>
+                        {/if}
+                        {#if data.population.hybridPct > 0}
+                            <div
+                                class="pop-seg hybrid"
+                                style="width: {data.population.hybridPct}%"
+                            >
+                                {#if data.population.hybridPct >= 8}{Math.round(
+                                        data.population.hybridPct,
+                                    )}%{/if}
+                            </div>
+                        {/if}
+                        {#if data.population.ecoPct > 0}
+                            <div
+                                class="pop-seg eco"
+                                style="width: {data.population.ecoPct}%"
+                            >
+                                {#if data.population.ecoPct >= 8}{Math.round(
+                                        data.population.ecoPct,
+                                    )}%{/if}
+                            </div>
+                        {/if}
+                        {#if data.population.unknownPct > 0}
+                            <div
+                                class="pop-seg unknown"
+                                style="width: {data.population.unknownPct}%"
+                            >
+                                {#if data.population.unknownPct >= 8}{Math.round(
+                                        data.population.unknownPct,
+                                    )}%{/if}
+                            </div>
+                        {/if}
+                    </div>
+                    <div class="pop-legend">
+                        <span class="pop-legend-item"
+                            ><span class="pop-dot war"></span> War: {data
+                                .population.war}</span
+                        >
+                        <span class="pop-legend-item"
+                            ><span class="pop-dot hybrid"></span> Hybrid: {data
+                                .population.hybrid}</span
+                        >
+                        <span class="pop-legend-item"
+                            ><span class="pop-dot eco"></span> Eco: {data
+                                .population.eco}</span
+                        >
+                        {#if data.population.unknown > 0}
+                            <span class="pop-legend-item"
+                                ><span class="pop-dot unknown"></span> No data — {data
+                                    .population.unknown}</span
+                            >
+                        {/if}
+                    </div>
+                </div>
+                <div class="pop-stats">
+                    <div class="pop-stat">
+                        <span class="muted">Citizens Analyzed</span>
+                        <span>{data.population.total}</span>
+                    </div>
+                    <div class="pop-stat">
+                        <span class="muted">Avg War Allocation</span>
+                        <span>{Math.round(data.population.avgWarShare)}%</span>
+                    </div>
+                </div>
+            </Card>
+        {/if}
+
         <!-- WEALTH & MILITARY POWER (60d) -->
         <Card title="Wealth & Military Power (60d)">
             {#if wealthChartPoints.length > 0}
@@ -653,23 +727,44 @@
                             )}</span
                         >
                     </div>
-                    <div class="dmg-card">
-                        <span class="dmg-label">Damage / Citizen</span>
-                        <span class="dmg-value"
-                            >{formatCompactNumber(
-                                damageMetrics.damagePerCitizen,
-                            )}</span
-                        >
-                    </div>
-                    <div class="dmg-card">
-                        <span class="dmg-label">Projected Capacity</span>
-                        <span class="dmg-value accent"
-                            >{formatCompactNumber(
-                                damageMetrics.projected,
-                            )}</span
-                        >
-                    </div>
+                    {#if data.damageEstimate}
+                        <div class="dmg-card">
+                            <span class="dmg-label">Est. Current Capacity</span>
+                            <span class="dmg-value"
+                                >{formatCompactNumber(
+                                    data.damageEstimate.currentCapacity,
+                                )}</span
+                            >
+                        </div>
+                        <div class="dmg-card">
+                            <span class="dmg-label"
+                                >Potential (Conservative)</span
+                            >
+                            <span class="dmg-value"
+                                >{formatCompactNumber(
+                                    data.damageEstimate.potentialConservative,
+                                )}</span
+                            >
+                        </div>
+                        <div class="dmg-card">
+                            <span class="dmg-label">Potential (Optimistic)</span
+                            >
+                            <span class="dmg-value accent"
+                                >{formatCompactNumber(
+                                    data.damageEstimate.potentialOptimistic,
+                                )}</span
+                            >
+                        </div>
+                    {/if}
                 </div>
+                {#if data.damageEstimate}
+                    <p class="estimate-caption">
+                        Estimated capacity based on citizen skill allocation and
+                        military rank. Conservative assumes eco players rarely
+                        switch; optimistic assumes full reallocation to war
+                        skills.
+                    </p>
+                {/if}
             {/if}
 
             {#if damageChartPoints.length > 0}
@@ -1687,12 +1782,6 @@
         margin-left: 4px;
     }
 
-    .inline-flex {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-
     /* DAMAGE */
     .damage-grid {
         display: grid;
@@ -1723,6 +1812,95 @@
         &.accent {
             color: #4af0c0;
         }
+    }
+
+    .estimate-caption {
+        color: #8c909f;
+        font-size: 11px;
+        margin-top: 8px;
+        line-height: 1.4;
+    }
+
+    /* POPULATION WAR READINESS */
+    .pop-bar-container {
+        margin-bottom: 12px;
+    }
+
+    .pop-bar {
+        display: flex;
+        height: 28px;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #1f1f1f;
+    }
+
+    .pop-seg {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        color: #171717;
+        min-width: 0;
+        transition: width 0.3s ease;
+
+        &.war {
+            background: #ffb4ab;
+        }
+        &.hybrid {
+            background: #c4a0ff;
+        }
+        &.eco {
+            background: #4af0c0;
+        }
+        &.unknown {
+            background: #555;
+        }
+    }
+
+    .pop-legend {
+        display: flex;
+        gap: 16px;
+        margin-top: 8px;
+        font-size: 12px;
+        color: #c2c6d6;
+    }
+
+    .pop-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .pop-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+
+        &.war {
+            background: #ffb4ab;
+        }
+        &.hybrid {
+            background: #c4a0ff;
+        }
+        &.eco {
+            background: #4af0c0;
+        }
+        &.unknown {
+            background: #555;
+        }
+    }
+
+    .pop-stats {
+        display: flex;
+        gap: 24px;
+        font-size: 13px;
+    }
+
+    .pop-stat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     /* WAGES */
