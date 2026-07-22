@@ -292,3 +292,20 @@ export type CountryPageLoadFailure = {
 export type CountryPageLoadData =
     | CountryPageLoadSuccess
     | CountryPageLoadFailure;
+
+export type CountryTaxFlowExplorerSource = {
+    country: import("./models").CountrySummary;
+    total: number;
+    hijacked: number;
+    foreignTaxRedirected: number;
+};
+
+export type CountryTaxFlowExplorerResponse = {
+    ok: boolean;
+    error?: string;
+    from: string;
+    to: string;
+    totalTax: number;
+    totalFromSources: number;
+    sources: CountryTaxFlowExplorerSource[];
+};

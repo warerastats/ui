@@ -1,5 +1,6 @@
 <script lang="ts">
     import Card from "$lib/components/Card.svelte";
+    import Coin from "$lib/components/Coin.svelte";
     import CountryFlag from "$lib/components/CountryFlag.svelte";
     import Wrapper from "$lib/components/Wrapper.svelte";
     import {
@@ -25,6 +26,43 @@
     ] as const;
     type HistoryTab = (typeof HISTORY_TABS)[number];
     let activeHistoryTab = $state<HistoryTab>("names");
+
+    let tradingPartners = $derived.by(() => {
+        if (!data.ok || !data.user) return [];
+        const userId = data.id;
+        const map = new Map<
+            string,
+            {
+                country: { id: string; name: string; code: string };
+                totalIn: number;
+                totalOut: number;
+            }
+        >();
+        for (const tx of data.user.transactions ?? []) {
+            if (tx.__typename !== "TradeTransaction") continue;
+            const isSeller = tx.seller?.id === userId;
+            const counterpartCountry = isSeller
+                ? tx.buyerCountry
+                : tx.sellerCountry;
+            if (!counterpartCountry) continue;
+            const key = counterpartCountry.id;
+            const amount = Math.abs(tx.money);
+            const existing = map.get(key);
+            if (existing) {
+                if (isSeller) existing.totalIn += amount;
+                else existing.totalOut += amount;
+            } else {
+                map.set(key, {
+                    country: counterpartCountry,
+                    totalIn: isSeller ? amount : 0,
+                    totalOut: isSeller ? 0 : amount,
+                });
+            }
+        }
+        return [...map.values()].sort(
+            (a, b) => b.totalIn + b.totalOut - (a.totalIn + a.totalOut),
+        );
+    });
 
     let latestSkillSnapshot = $derived.by(() => {
         if (!data.ok || !data.user) return null;
@@ -385,6 +423,61 @@
                     </div>
                 </Card>
             </div>
+
+            {#if tradingPartners.length > 0}
+                <Card title="Trading Partners">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Country</th>
+                                    <th>Incoming</th>
+                                    <th>Outgoing</th>
+                                    <th>Net</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {#each tradingPartners as tp}
+                                    {@const net = tp.totalIn - tp.totalOut}
+                                    <tr>
+                                        <td class="country-cell">
+                                            <CountryFlag
+                                                code={tp.country.code}
+                                                height="14px"
+                                            />
+                                            <a href="/country/{tp.country.id}"
+                                                >{tp.country.name}</a
+                                            >
+                                        </td>
+                                        <td
+                                            ><Coin width="12px" height="12px" />
+                                            {formatCompactNumber(
+                                                tp.totalIn,
+                                            )}</td
+                                        >
+                                        <td
+                                            ><Coin width="12px" height="12px" />
+                                            {formatCompactNumber(
+                                                tp.totalOut,
+                                            )}</td
+                                        >
+                                        <td
+                                            class:positive={net > 0}
+                                            class:negative={net < 0}
+                                            ><Coin width="12px" height="12px" />
+                                            {net > 0
+                                                ? "+"
+                                                : ""}{formatCompactNumber(
+                                                net,
+                                            )}</td
+                                        >
+                                    </tr>
+                                {/each}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
+            {/if}
 
             <Card title="History">
                 <div class="tabs">
@@ -932,6 +1025,56 @@
         margin: 0;
         color: #8c909f;
         font-size: 12px;
+    }
+
+    /* TRADING PARTNERS TABLE */
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    th {
+        text-align: left;
+        color: #8c909f;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 6px 10px;
+        border-bottom: 1px solid #353535;
+    }
+
+    td {
+        padding: 8px 10px;
+        color: #c2c6d6;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    .country-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        a {
+            color: #c2c6d6;
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+
+    .positive {
+        color: #4af0c0;
+    }
+
+    .negative {
+        color: #ffb4ab;
     }
 
     @media (max-width: 1200px) {

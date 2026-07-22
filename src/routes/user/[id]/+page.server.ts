@@ -1,6 +1,16 @@
 import type { PageServerLoad } from "./$types";
-import type { UserPageLoadData, UserQueryResult } from "$lib";
+import type { User, UserPageLoadData } from "$lib";
 import { runGraphQL } from "$lib/server/graphql/client";
+
+type RawUserQueryResult = {
+    user:
+        | (Omit<User, "transactions"> & {
+              transactions: {
+                  edges: User["transactions"];
+              };
+          })
+        | null;
+};
 
 function getLast7CompletedDaysWindow() {
     const today = new Date();
@@ -325,7 +335,7 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
 
     try {
         const range = getLast7CompletedDaysWindow();
-        const result = await runGraphQL<UserQueryResult>(fetch, USER_QUERY, {
+        const result = await runGraphQL<RawUserQueryResult>(fetch, USER_QUERY, {
             id,
             from: range.from,
             to: range.to,
@@ -340,9 +350,9 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
             } satisfies UserPageLoadData;
         }
 
-        const user = result.data?.user;
+        const rawUser = result.data?.user;
 
-        if (!user) {
+        if (!rawUser) {
             return {
                 ok: false,
                 id,
@@ -350,6 +360,11 @@ export const load: PageServerLoad = async ({ fetch, params }) => {
                 user: null,
             } satisfies UserPageLoadData;
         }
+
+        const user: User = {
+            ...rawUser,
+            transactions: rawUser.transactions?.edges ?? [],
+        };
 
         return {
             ok: true,

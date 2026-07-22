@@ -12,6 +12,7 @@
         getEthicsLabel,
         getItemName,
     } from "$lib/helpers";
+    import type { CountryTaxFlowExplorerResponse } from "$lib";
     import type { PageData } from "./$types";
 
     let { data }: { data: PageData } = $props();
@@ -312,6 +313,86 @@
         "imperialism",
         "industrialism",
     ] as const;
+
+    // --- Tax Flow Explorer (interactive, arbitrary date range) ---
+    function toDateInput(date: Date): string {
+        return date.toISOString().slice(0, 10);
+    }
+
+    const explorerDefaultTo = new Date(
+        Date.UTC(
+            new Date().getUTCFullYear(),
+            new Date().getUTCMonth(),
+            new Date().getUTCDate(),
+        ),
+    );
+    const explorerDefaultFrom = new Date(
+        explorerDefaultTo.getTime() - 14 * 24 * 60 * 60 * 1000,
+    );
+
+    let explorerFrom = $state(toDateInput(explorerDefaultFrom));
+    let explorerTo = $state(toDateInput(explorerDefaultTo));
+    let explorerLoading = $state(false);
+    let explorerError = $state<string | null>(null);
+    let explorerResult = $state<CountryTaxFlowExplorerResponse | null>(null);
+    let explorerSelectedCountry = $state("");
+
+    let explorerSelectedSource = $derived(
+        explorerResult && explorerSelectedCountry
+            ? (explorerResult.sources.find(
+                  (s) => s.country.id === explorerSelectedCountry,
+              ) ?? null)
+            : null,
+    );
+
+    let explorerHeadline = $derived(
+        explorerSelectedSource
+            ? explorerSelectedSource.total
+            : (explorerResult?.totalFromSources ?? 0),
+    );
+
+    async function runExplorer() {
+        if (explorerLoading) return;
+        explorerError = null;
+
+        const fromIso = new Date(explorerFrom + "T00:00:00Z").toISOString();
+        const toIso = new Date(explorerTo + "T00:00:00Z").toISOString();
+
+        if (new Date(fromIso).getTime() >= new Date(toIso).getTime()) {
+            explorerError = "The 'from' date must be before the 'to' date.";
+            return;
+        }
+
+        explorerLoading = true;
+        try {
+            const params = new URLSearchParams({ from: fromIso, to: toIso });
+            const res = await fetch(
+                `/api/country/${data.id}/tax-flow?${params.toString()}`,
+            );
+            const body = (await res.json()) as CountryTaxFlowExplorerResponse;
+            if (!res.ok || !body.ok) {
+                explorerError = body.error || "Failed to load tax flow data.";
+                explorerResult = null;
+                return;
+            }
+            explorerResult = body;
+            // Reset country filter if it no longer exists in the new result.
+            if (
+                explorerSelectedCountry &&
+                !body.sources.some(
+                    (s) => s.country.id === explorerSelectedCountry,
+                )
+            ) {
+                explorerSelectedCountry = "";
+            }
+        } catch (err) {
+            explorerError =
+                err instanceof Error ? err.message : "Unknown error";
+            explorerResult = null;
+        } finally {
+            explorerLoading = false;
+        }
+    }
 </script>
 
 <svelte:head>
@@ -608,6 +689,118 @@
                         </tbody>
                     </table>
                 </div>
+            {/if}
+        </Card>
+
+        <!-- TAX FLOW EXPLORER -->
+        <Card title="Tax Flow Explorer">
+            <p class="explorer-intro">
+                Tax generated for {c.name} thanks to other countries' activity over
+                a custom date range.
+            </p>
+            <div class="explorer-controls">
+                <label class="explorer-field">
+                    <span>From</span>
+                    <input
+                        type="date"
+                        bind:value={explorerFrom}
+                        max={explorerTo}
+                    />
+                </label>
+                <label class="explorer-field">
+                    <span>To</span>
+                    <input
+                        type="date"
+                        bind:value={explorerTo}
+                        min={explorerFrom}
+                    />
+                </label>
+                <button
+                    class="explorer-btn"
+                    onclick={runExplorer}
+                    disabled={explorerLoading}
+                >
+                    {explorerLoading ? "Loading…" : "Explore"}
+                </button>
+            </div>
+
+            {#if explorerError}
+                <p class="explorer-error">{explorerError}</p>
+            {/if}
+
+            {#if explorerResult}
+                {#if explorerResult.sources.length === 0}
+                    <p class="muted">No tax flow recorded for this range.</p>
+                {:else}
+                    <div class="explorer-summary">
+                        <label class="explorer-field">
+                            <span>Source country</span>
+                            <select bind:value={explorerSelectedCountry}>
+                                <option value="">All countries</option>
+                                {#each explorerResult.sources as src}
+                                    <option value={src.country.id}
+                                        >{src.country.name}</option
+                                    >
+                                {/each}
+                            </select>
+                        </label>
+                        <div class="explorer-total">
+                            <span class="explorer-total-label">
+                                {explorerSelectedSource
+                                    ? `Tax from ${explorerSelectedSource.country.name}`
+                                    : "Total tax from all sources"}
+                            </span>
+                            <span class="explorer-total-value">
+                                <Coin width="16px" height="16px" />
+                                {formatMoney(explorerHeadline, 2)}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Country</th>
+                                    <th>Total Tax</th>
+                                    <th>Foreign Redirected</th>
+                                    <th>Hijacked</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {#each explorerResult.sources as src}
+                                    <tr
+                                        class:highlight={explorerSelectedCountry ===
+                                            src.country.id}
+                                    >
+                                        <td class="country-cell">
+                                            <CountryFlag
+                                                code={src.country.code}
+                                                height="14px"
+                                            />
+                                            {src.country.name}
+                                        </td>
+                                        <td
+                                            ><Coin width="12px" height="12px" />
+                                            {formatMoney(src.total, 2)}</td
+                                        >
+                                        <td
+                                            ><Coin width="12px" height="12px" />
+                                            {formatMoney(
+                                                src.foreignTaxRedirected,
+                                                2,
+                                            )}</td
+                                        >
+                                        <td
+                                            ><Coin width="12px" height="12px" />
+                                            {formatMoney(src.hijacked, 2)}</td
+                                        >
+                                    </tr>
+                                {/each}
+                            </tbody>
+                        </table>
+                    </div>
+                {/if}
             {/if}
         </Card>
 
@@ -1735,6 +1928,109 @@
         flex-wrap: wrap;
         align-items: center;
         font-size: 13px;
+    }
+
+    /* TAX FLOW EXPLORER */
+    .explorer-intro {
+        color: #8c909f;
+        font-size: 13px;
+        margin: 0 0 14px;
+        line-height: 1.4;
+    }
+
+    .explorer-controls {
+        display: flex;
+        gap: 12px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+    }
+
+    .explorer-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        span {
+            color: #8c909f;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        input,
+        select {
+            background: #1f1f1f;
+            border: 1px solid #353535;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 13px;
+            padding: 8px 10px;
+            color-scheme: dark;
+
+            &:focus {
+                outline: none;
+                border-color: #4af0c0;
+            }
+        }
+    }
+
+    .explorer-btn {
+        background: #4af0c0;
+        border: none;
+        border-radius: 6px;
+        color: #171717;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 9px 20px;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            background: #6ff5d0;
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+    }
+
+    .explorer-error {
+        color: #ffb4ab;
+        font-size: 13px;
+        margin: 8px 0;
+    }
+
+    .explorer-summary {
+        display: flex;
+        gap: 24px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        margin: 16px 0;
+    }
+
+    .explorer-total {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .explorer-total-label {
+        color: #8c909f;
+        font-size: 11px;
+        text-transform: uppercase;
+    }
+
+    .explorer-total-value {
+        color: #fff;
+        font-size: 22px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    tr.highlight td {
+        background: #4af0c00a;
     }
 
     /* TABLES */
